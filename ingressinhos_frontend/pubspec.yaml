@@ -7,6 +7,7 @@ environment:
   sdk: ^3.11.4
 
 dependencies:
+  brasil_fields: ^1.19.0
   dio: ^5.9.2
   equatable: ^2.0.8
   flutter:
@@ -14,6 +15,8 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_secure_storage: ^10.1.0
   get_it: ^9.2.1
+  google_fonts: ^8.1.0
+  mask_text_input_formatter: ^2.9.0
 
 dev_dependencies:
   flutter_test:

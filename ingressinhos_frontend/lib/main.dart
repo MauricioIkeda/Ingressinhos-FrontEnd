@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/auth_gate.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_page.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_page.dart';
 
 void main() {
   setup();
@@ -20,6 +22,11 @@ class MainApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: AuthGate(),
+
+        routes: {
+          '/login': (context) => LoginPage(),
+          '/register': (context) => RegisterPage(),
+        },
       ),
     );
   }

@@ -8,24 +8,15 @@ import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page
 class AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return BlocBuilder<AuthCubit, AuthState>(
-
       builder: (context, state) {
-
         if (state is AuthLoading) {
-
           return const Scaffold(
-            body: Center(
-              child:
-                  CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (state
-            is AuthAuthenticated) {
-
+        if (state is AuthAuthenticated) {
           return HomePage();
         }
 
