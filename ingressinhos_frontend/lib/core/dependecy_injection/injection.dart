@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:ingressinhos_frontend/core/network/clients/auth_dio_client.dart';
+import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
 import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource_impl.dart';
@@ -10,13 +11,29 @@ import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubi
 final getIt = GetIt.instance;
 
 void setup() {
-  getIt.registerLazySingleton<AuthDioClient>(()=> AuthDioClient());
+  getIt.registerLazySingleton<AuthDioClient>(() => AuthDioClient());
+
+  getIt.registerLazySingleton<IngressinhosDioClient>(
+    () => IngressinhosDioClient(),
+  );
 
   getIt.registerLazySingleton(() => SecureStorageService());
 
-  getIt.registerLazySingleton<AuthRemoteDatasource>(() => AuthRemoteDatasourceImpl(getIt()));
+  getIt.registerLazySingleton<AuthRemoteDatasource>(
+    () => AuthRemoteDatasourceImpl(
+      getIt<AuthDioClient>(),
+      getIt<IngressinhosDioClient>(),
+    ),
+  );
 
-  getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(remoteDatasource: getIt(), storage: getIt()));
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
+      remoteDatasource: getIt<AuthRemoteDatasource>(),
+      storage: getIt<SecureStorageService>(),
+    ),
+  );
 
-  getIt.registerFactory(() => AuthCubit(authRepository: getIt()));
+  getIt.registerFactory(
+    () => AuthCubit(authRepository: getIt<AuthRepository>()),
+  );
 }

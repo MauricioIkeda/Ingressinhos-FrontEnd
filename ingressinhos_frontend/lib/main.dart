@@ -5,6 +5,7 @@ import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubi
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/auth_gate.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_page.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
 
 void main() {
   setup();
@@ -26,6 +27,7 @@ class MainApp extends StatelessWidget {
         routes: {
           '/login': (context) => LoginPage(),
           '/register': (context) => RegisterPage(),
+          '/home': (context) => HomePage(),
         },
       ),
     );

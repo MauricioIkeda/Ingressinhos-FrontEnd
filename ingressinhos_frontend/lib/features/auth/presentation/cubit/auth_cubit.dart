@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/register_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
@@ -27,23 +28,23 @@ class AuthCubit extends Cubit<AuthState> {
         password: registerUserModel.password,
         cpf: registerUserModel.cpf,
       );
-      emit(AuthUnauthenticated());
-    } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
-
-      emit(AuthUnauthenticated());
+      emit(AuthRegisterSuccess());
+    } catch (e) {
+      emit(AuthError(e.toString()));
     }
   }
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> login({required LoginUserModel loginUserModel}) async {
     emit(AuthLoading());
 
     try {
-      await authRepository.login(email: email, password: password);
+      await authRepository.login(
+        email: loginUserModel.email,
+        password: loginUserModel.password,
+      );
       emit(AuthAuthenticated());
     } catch (e) {
-      emit(AuthUnauthenticated());
+      emit(AuthError(e.toString().replaceFirst('Exception: ', '')));
     }
   }
 

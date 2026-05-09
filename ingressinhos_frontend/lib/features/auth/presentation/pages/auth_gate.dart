@@ -6,21 +6,34 @@ import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_pag
 import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
 
 class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        if (state is AuthLoading) {
+
+        if (state is AuthInitial || state is AuthLoading) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
 
         if (state is AuthAuthenticated) {
-          return HomePage();
+          return const HomePage();
         }
 
-        return LoginPage();
+        if (state is AuthUnauthenticated || state is AuthError) {
+          return const LoginPage();
+        }
+
+        return const Scaffold(
+          body: Center(
+            child: Text('Estado desconhecido'),
+          ),
+        );
       },
     );
   }

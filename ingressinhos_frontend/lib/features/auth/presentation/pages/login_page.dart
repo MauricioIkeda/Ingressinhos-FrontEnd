@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_page.dart';
+import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final emailController = TextEditingController();
+
+  final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,138 +34,215 @@ class LoginPage extends StatelessWidget {
     const primaryFocus = Color(0xFFFFA552);
     const secondaryText = Color(0xFFBDBDBD);
 
+    const space = SizedBox(height: 16);
+
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Ingressinhos',
-              style: GoogleFonts.poppins(
-                fontSize: 54,
-                fontWeight: FontWeight.bold,
-                color: primaryColor,
+
+      body: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
               ),
-            ),
+            );
+          }
+        },
 
-            const SizedBox(height: 40),
+        builder: (context, state) {
+          return Center(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
 
-            SizedBox(
-              width: 300,
-              child: TextField(
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
 
-                decoration: InputDecoration(
-                  labelText: 'E-mail',
+                  children: [
+                    Text(
+                      'Ingressinhos',
 
-                  labelStyle: GoogleFonts.poppins(
-                    color: secondaryText,
-                  ),
-
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: primaryColor,
+                      style: GoogleFonts.poppins(
+                        fontSize: 54,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
                     ),
-                  ),
 
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: primaryFocus,
-                      width: 2,
+                    const SizedBox(height: 40),
+
+                    SizedBox(
+                      width: 300,
+
+                      child: TextFormField(
+                        controller: emailController,
+
+                        style: GoogleFonts.poppins(color: Colors.white),
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'E-mail obrigatório';
+                          }
+
+                          if (!value.contains('@')) {
+                            return 'E-mail inválido';
+                          }
+
+                          return null;
+                        },
+
+                        decoration: InputDecoration(
+                          labelText: 'E-mail',
+
+                          labelStyle: GoogleFonts.poppins(color: secondaryText),
+
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+
+                            borderSide: const BorderSide(color: primaryColor),
+                          ),
+
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+
+                            borderSide: const BorderSide(
+                              color: primaryFocus,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ),
 
-            const SizedBox(height: 20),
+                    space,
 
-            SizedBox(
-              width: 300,
-              child: TextField(
-                obscureText: true,
+                    SizedBox(
+                      width: 300,
 
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                ),
+                      child: TextFormField(
+                        controller: passwordController,
 
-                decoration: InputDecoration(
-                  labelText: 'Senha',
+                        obscureText: true,
 
-                  labelStyle: GoogleFonts.poppins(
-                    color: secondaryText,
-                  ),
+                        style: GoogleFonts.poppins(color: Colors.white),
 
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: primaryColor,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Senha obrigatória';
+                          }
+
+                          if (value.length < 6) {
+                            return 'Senha deve ter pelo menos 6 caracteres';
+                          }
+
+                          return null;
+                        },
+
+                        decoration: InputDecoration(
+                          labelText: 'Senha',
+
+                          labelStyle: GoogleFonts.poppins(color: secondaryText),
+
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+
+                            borderSide: const BorderSide(color: primaryColor),
+                          ),
+
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+
+                            borderSide: const BorderSide(
+                              color: primaryFocus,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
 
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: primaryFocus,
-                      width: 2,
+                    const SizedBox(height: 30),
+
+                    SizedBox(
+                      width: 300,
+
+                      child: ElevatedButton(
+                        onPressed: state is AuthLoading
+                            ? null
+                            : () {
+                                final isValid = _formKey.currentState!
+                                    .validate();
+
+                                if (!isValid) {
+                                  return;
+                                }
+
+                                final userModel = LoginUserModel(
+                                  email: emailController.text.trim(),
+                                  password: passwordController.text.trim(),
+                                );
+
+                                context.read<AuthCubit>().login(
+                                  loginUserModel: userModel,
+                                );
+                              },
+
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+
+                        child: state is AuthLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Logar',
+
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
                     ),
-                  ),
+
+                    const SizedBox(height: 12),
+
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/register');
+                      },
+
+                      child: Text(
+                        'Criar uma conta',
+
+                        style: GoogleFonts.poppins(color: secondaryText),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: () {},
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                  ),
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-
-                child: Text(
-                  'Logar',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            TextButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => const RegisterPage(),
-                ));
-              },
-              child: Text(
-                'Não possuo uma conta',
-                style: GoogleFonts.poppins(
-                  color: secondaryText,
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
