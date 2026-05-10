@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/services.dart';
+import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/register_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
@@ -37,30 +39,21 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF1E1E1E);
-    const primaryColor = Color(0xFFFF8C42);
-    const primaryFocus = Color(0xFFFFA552);
-    const secondaryText = Color(0xFFBDBDBD);
-
     const space = SizedBox(height: 16);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthRegisterSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Usuário cadastrado com sucesso!')),
-            );
+            showErrorSnackBar(context, 'Usuário cadastrado com sucesso!', false);
 
             Navigator.pushReplacementNamed(context, '/login');
           }
 
           if (state is AuthError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            showErrorSnackBar(context, state.message, true);
           }
         },
 
@@ -81,7 +74,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 54,
                           fontWeight: FontWeight.bold,
-                          color: primaryColor,
+                          color: AppColors.primaryColor,
                         ),
                       ),
 
@@ -107,20 +100,20 @@ class _RegisterPageState extends State<RegisterPage> {
                             labelText: 'Nome',
 
                             labelStyle: GoogleFonts.poppins(
-                              color: secondaryText,
+                              color: AppColors.secondaryText,
                             ),
 
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: primaryColor),
+                              borderSide: const BorderSide(color: AppColors.primaryColor),
                             ),
 
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
                               borderSide: const BorderSide(
-                                color: primaryFocus,
+                                color: AppColors.primaryFocus,
                                 width: 2,
                               ),
                             ),
@@ -154,20 +147,20 @@ class _RegisterPageState extends State<RegisterPage> {
                             labelText: 'E-mail',
 
                             labelStyle: GoogleFonts.poppins(
-                              color: secondaryText,
+                              color: AppColors.secondaryText,
                             ),
 
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: primaryColor),
+                              borderSide: const BorderSide(color: AppColors.primaryColor),
                             ),
 
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
                               borderSide: const BorderSide(
-                                color: primaryFocus,
+                                color: AppColors.primaryFocus,
                                 width: 2,
                               ),
                             ),
@@ -204,20 +197,20 @@ class _RegisterPageState extends State<RegisterPage> {
                             labelText: 'CPF',
 
                             labelStyle: GoogleFonts.poppins(
-                              color: secondaryText,
+                              color: AppColors.secondaryText,
                             ),
 
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: primaryColor),
+                              borderSide: const BorderSide(color: AppColors.primaryColor),
                             ),
 
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
                               borderSide: const BorderSide(
-                                color: primaryFocus,
+                                color: AppColors.primaryFocus,
                                 width: 2,
                               ),
                             ),
@@ -253,20 +246,20 @@ class _RegisterPageState extends State<RegisterPage> {
                             labelText: 'Senha',
 
                             labelStyle: GoogleFonts.poppins(
-                              color: secondaryText,
+                              color: AppColors.secondaryText,
                             ),
 
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: primaryColor),
+                              borderSide: const BorderSide(color: AppColors.primaryColor),
                             ),
 
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
                               borderSide: const BorderSide(
-                                color: primaryFocus,
+                                color: AppColors.primaryFocus,
                                 width: 2,
                               ),
                             ),
@@ -303,7 +296,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
 
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
+                            backgroundColor: AppColors.primaryColor,
                             foregroundColor: Colors.white,
 
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -336,7 +329,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Text(
                           'Fazer login',
 
-                          style: GoogleFonts.poppins(color: secondaryText),
+                          style: GoogleFonts.poppins(color: AppColors.secondaryText),
                         ),
                       ),
                     ],

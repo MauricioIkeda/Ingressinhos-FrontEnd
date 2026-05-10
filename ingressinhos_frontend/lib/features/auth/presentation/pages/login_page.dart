@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
@@ -29,15 +31,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF1E1E1E);
-    const primaryColor = Color(0xFFFF8C42);
-    const primaryFocus = Color(0xFFFFA552);
-    const secondaryText = Color(0xFFBDBDBD);
-
     const space = SizedBox(height: 16);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -46,12 +43,7 @@ class _LoginPageState extends State<LoginPage> {
           }
 
           if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            showErrorSnackBar(context, state.message, true);
           }
         },
 
@@ -71,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: GoogleFonts.poppins(
                         fontSize: 54,
                         fontWeight: FontWeight.bold,
-                        color: primaryColor,
+                        color: AppColors.primaryColor,
                       ),
                     ),
 
@@ -100,19 +92,19 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'E-mail',
 
-                          labelStyle: GoogleFonts.poppins(color: secondaryText),
+                          labelStyle: GoogleFonts.poppins(color: AppColors.secondaryText),
 
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
 
-                            borderSide: const BorderSide(color: primaryColor),
+                            borderSide: const BorderSide(color: AppColors.primaryColor),
                           ),
 
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
 
                             borderSide: const BorderSide(
-                              color: primaryFocus,
+                              color: AppColors.primaryFocus,
                               width: 2,
                             ),
                           ),
@@ -147,19 +139,19 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'Senha',
 
-                          labelStyle: GoogleFonts.poppins(color: secondaryText),
+                          labelStyle: GoogleFonts.poppins(color: AppColors.secondaryText),
 
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
 
-                            borderSide: const BorderSide(color: primaryColor),
+                            borderSide: const BorderSide(color: AppColors.primaryColor),
                           ),
 
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
 
                             borderSide: const BorderSide(
-                              color: primaryFocus,
+                              color: AppColors.primaryFocus,
                               width: 2,
                             ),
                           ),
@@ -194,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                               },
 
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
+                          backgroundColor: AppColors.primaryColor,
                           foregroundColor: Colors.white,
 
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -234,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         'Criar uma conta',
 
-                        style: GoogleFonts.poppins(color: secondaryText),
+                        style: GoogleFonts.poppins(color: AppColors.secondaryText),
                       ),
                     ),
                   ],

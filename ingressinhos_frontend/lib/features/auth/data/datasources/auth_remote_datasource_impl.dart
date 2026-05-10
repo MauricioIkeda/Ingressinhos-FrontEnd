@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:ingressinhos_frontend/core/network/clients/auth_dio_client.dart';
 import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
 import 'package:ingressinhos_frontend/core/network/endpoints.dart';
+import 'package:ingressinhos_frontend/features/auth/data/exceptions/auth_exception.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/entities/auth_tokens.dart';
 
@@ -11,40 +12,67 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
   AuthRemoteDatasourceImpl(this._authDioClient, this._ingressinhosClient);
 
-@override
-Future<AuthTokens> login({
-  required String email,
-  required String password,
-}) async {
-  try {
-    final response = await _authDioClient.dio.post(
-      Endpoints.authLogin,
-      data: {
-        'email': email,
-        'password': password,
-      },
-    );
+  String _mapDioError(DioException e, String fallbackMessage) {
+    if (e.type == DioExceptionType.connectionError) {
+      return 'Nao foi possivel conectar ao servidor';
+    }
 
-    return AuthTokens(
-      token: response.data['token'],
-      refreshToken: response.data['refreshToken'],
-    );
-  } on DioException catch (e) {
+    if (e.type == DioExceptionType.connectionTimeout) {
+      return 'Tempo de conexao esgotado';
+    }
+
     final data = e.response?.data;
 
     if (data is List && data.isNotEmpty) {
-      final message = data[0]['mensagem'];
+      final first = data.first;
 
-      throw Exception(message);
+      if (first is Map && first['mensagem'] != null) {
+        return first['mensagem'].toString();
+      }
+
+      return first.toString();
     }
 
-    if (data is Map && data.containsKey('message')) {
-      throw Exception(data['message']);
+    if (data is Map) {
+      if (data['mensagem'] != null) {
+        return data['mensagem'].toString();
+      }
+
+      if (data['message'] != null) {
+        return data['message'].toString();
+      }
     }
 
-    throw Exception('Erro ao fazer login');
+    if (data is String && data.trim().isNotEmpty) {
+      return data;
+    }
+
+    if (e.response?.statusCode != null) {
+      return '$fallbackMessage (HTTP ${e.response?.statusCode})';
+    }
+
+    return fallbackMessage;
   }
-}
+
+  @override
+  Future<AuthTokens> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _authDioClient.dio.post(
+        Endpoints.authLogin,
+        data: {'email': email, 'password': password},
+      );
+
+      return AuthTokens(
+        token: response.data['token'],
+        refreshToken: response.data['refreshToken'],
+      );
+    } on DioException catch (e) {
+      throw AuthException(_mapDioError(e, 'Erro ao fazer login'));
+    }
+  }
 
   @override
   Future<void> register({
@@ -59,24 +87,19 @@ Future<AuthTokens> login({
         data: {'name': name, 'email': email, 'password': password, 'cpf': cpf},
       );
     } on DioException catch (e) {
-      final data = e.response?.data;
-
-      if (data is List && data.isNotEmpty) {
-        final message = data[0]['mensagem'];
-
-        throw Exception(message);
-      }
-
-      throw Exception('Erro ao cadastrar usuário');
+      throw AuthException(_mapDioError(e, 'Erro ao cadastrar usuario'));
     }
   }
 
   @override
-  Future<AuthTokens> refreshToken({required String token, required String refreshToken}) async {
+  Future<AuthTokens> refreshToken({
+    required String token,
+    required String refreshToken,
+  }) async {
     try {
       final response = await _authDioClient.dio.post(
         Endpoints.authRefreshToken,
-        data: {'token': token,'refreshToken': refreshToken},
+        data: {'token': token, 'refreshToken': refreshToken},
       );
 
       return AuthTokens(
@@ -84,15 +107,7 @@ Future<AuthTokens> login({
         refreshToken: response.data['refreshToken'],
       );
     } on DioException catch (e) {
-      final data = e.response?.data;
-
-      if (data is List && data.isNotEmpty) {
-        final message = data[0]['mensagem'];
-
-        throw Exception(message);
-      }
-
-      throw Exception('Erro ao atualizar token');
+      throw AuthException(_mapDioError(e, 'Erro ao atualizar token'));
     }
   }
 }

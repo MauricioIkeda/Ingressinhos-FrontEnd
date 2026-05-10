@@ -1,7 +1,6 @@
 import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
 

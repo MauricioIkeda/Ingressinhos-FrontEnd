@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/register_user_model.dart';
+import 'package:ingressinhos_frontend/features/auth/data/exceptions/auth_exception.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 
@@ -30,7 +31,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       emit(AuthRegisterSuccess());
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(_mapError(e)));
     }
   }
 
@@ -44,8 +45,16 @@ class AuthCubit extends Cubit<AuthState> {
       );
       emit(AuthAuthenticated());
     } catch (e) {
-      emit(AuthError(e.toString().replaceFirst('Exception: ', '')));
+      emit(AuthError(_mapError(e)));
     }
+  }
+
+  String _mapError(Object error) {
+    if (error is AuthException) {
+      return error.message;
+    }
+
+    return error.toString().replaceFirst('Exception: ', '');
   }
 
   Future<void> logout() async {
