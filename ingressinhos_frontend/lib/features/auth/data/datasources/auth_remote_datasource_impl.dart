@@ -70,4 +70,29 @@ Future<AuthTokens> login({
       throw Exception('Erro ao cadastrar usuário');
     }
   }
+
+  @override
+  Future<AuthTokens> refreshToken({required String token, required String refreshToken}) async {
+    try {
+      final response = await _authDioClient.dio.post(
+        Endpoints.authRefreshToken,
+        data: {'token': token,'refreshToken': refreshToken},
+      );
+
+      return AuthTokens(
+        token: response.data['token'],
+        refreshToken: response.data['refreshToken'],
+      );
+    } on DioException catch (e) {
+      final data = e.response?.data;
+
+      if (data is List && data.isNotEmpty) {
+        final message = data[0]['mensagem'];
+
+        throw Exception(message);
+      }
+
+      throw Exception('Erro ao atualizar token');
+    }
+  }
 }

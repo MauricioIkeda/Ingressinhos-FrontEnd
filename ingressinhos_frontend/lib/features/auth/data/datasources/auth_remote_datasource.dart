@@ -12,4 +12,9 @@ abstract class AuthRemoteDatasource {
     required String email,
     required String password,
   });
+
+  Future<AuthTokens> refreshToken({
+    required String token,
+    required String refreshToken,
+  });
 }
