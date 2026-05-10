@@ -9,15 +9,15 @@ class IngressinhosAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      elevation: 2,
+      elevation: 1,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.white,
-      iconTheme: IconThemeData(color: AppColors.secondaryText),
+      iconTheme: IconThemeData(color: AppColors.primaryText),
       backgroundColor: AppColors.appBarBackgroundColor,
       title: Text(
         'Ingressinhos',
         style: GoogleFonts.poppins(
-          color: AppColors.secondaryText,
+          color: AppColors.primaryColor,
           fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
@@ -38,67 +38,91 @@ class IngressinhosDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: AppColors.backgroundColor,
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.appBarBackgroundColor),
-            child: Stack(
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
               children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    tooltip: 'Deslogar',
-                    icon: Icon(Icons.logout, color: Colors.white),
-                    onPressed: onLogout,
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: AppColors.appBarBackgroundColor,
+                  ),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(),
+                        SizedBox(width: 16),
+                        Text(
+                          'Mauricio Ikeda',
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryText,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircleAvatar(),
-                      SizedBox(width: 16),
-                      Text(
-                        'Mauricio Ikeda',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                ListTile(
+                  leading: Icon(Icons.home, color: AppColors.primaryText),
+                  title: Text(
+                    'Home',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primaryText,
+                      fontSize: 18,
+                    ),
                   ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.confirmation_num_sharp, color: AppColors.primaryText),
+                  title: Text(
+                    'Meus Ingressos',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primaryText,
+                      fontSize: 18,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings, color: AppColors.primaryText),
+                  title: Text(
+                    'Configurações',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primaryText,
+                      fontSize: 18,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
               ],
             ),
           ),
+          Divider(color: AppColors.secondaryText.withOpacity(0.3), height: 1),
           ListTile(
-            leading: Icon(Icons.home, color: AppColors.secondaryText),
+            leading: Icon(Icons.exit_to_app, color: AppColors.primaryText),
             title: Text(
-              'Home',
+              'Deslogar',
               style: GoogleFonts.poppins(
-                color: AppColors.secondaryText,
+                color: AppColors.primaryText,
                 fontSize: 18,
               ),
             ),
             onTap: () {
-              Navigator.pop(context);
+              onLogout?.call();
             },
           ),
-          ListTile(
-            leading: Icon(Icons.settings, color: AppColors.secondaryText),
-            title: Text(
-              'Settings',
-              style: GoogleFonts.poppins(
-                color: AppColors.secondaryText,
-                fontSize: 18,
-              ),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+          SizedBox(height: 8),
         ],
       ),
     );

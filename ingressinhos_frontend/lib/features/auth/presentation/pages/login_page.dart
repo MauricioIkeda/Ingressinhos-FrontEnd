@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: TextFormField(
                         controller: emailController,
 
-                        style: GoogleFonts.poppins(color: Colors.white),
+                        style: GoogleFonts.poppins(color: AppColors.primaryText),
 
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         obscureText: true,
 
-                        style: GoogleFonts.poppins(color: Colors.white),
+                        style: GoogleFonts.poppins(color: AppColors.primaryText),
 
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -187,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.primaryText,
 
                           padding: const EdgeInsets.symmetric(vertical: 16),
 
@@ -201,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
-                                  color: Colors.white,
+                                  color: AppColors.primaryText,
                                   strokeWidth: 2,
                                 ),
                               )

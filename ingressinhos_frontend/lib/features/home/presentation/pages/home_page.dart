@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
           child: Text(
             'Home Page',
             style: GoogleFonts.poppins(
-              color: AppColors.secondaryText,
+              color: AppColors.primaryText,
               fontSize: 18,
             ),
           ),

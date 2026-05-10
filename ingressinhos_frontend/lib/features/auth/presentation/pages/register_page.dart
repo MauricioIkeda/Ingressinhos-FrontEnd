@@ -86,7 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: TextFormField(
                           controller: nameController,
 
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          style: GoogleFonts.poppins(color: AppColors.primaryText),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -129,7 +129,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: TextFormField(
                           controller: emailController,
 
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          style: GoogleFonts.poppins(color: AppColors.primaryText),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -183,7 +183,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             CpfInputFormatter(),
                           ],
 
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          style: GoogleFonts.poppins(color: AppColors.primaryText),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -228,7 +228,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                           obscureText: true,
 
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          style: GoogleFonts.poppins(color: AppColors.primaryText),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -297,7 +297,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryColor,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppColors.primaryText,
 
                             padding: const EdgeInsets.symmetric(vertical: 16),
 
