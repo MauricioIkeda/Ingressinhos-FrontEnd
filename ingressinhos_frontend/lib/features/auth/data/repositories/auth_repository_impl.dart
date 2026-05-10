@@ -22,12 +22,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return false;
     }
 
-    final isExpired = JwtDecoder.isExpired(token);
-
-    if(!isExpired) {
-      return true;
-    }
-
     final refreshToken = await storage.getRefreshToken();
 
     if(refreshToken == null) {
