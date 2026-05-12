@@ -75,7 +75,9 @@ class _LoginPageState extends State<LoginPage> {
                       child: TextFormField(
                         controller: emailController,
 
-                        style: GoogleFonts.poppins(color: AppColors.primaryText),
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primaryText,
+                        ),
 
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -92,12 +94,16 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'E-mail',
 
-                          labelStyle: GoogleFonts.poppins(color: AppColors.secondaryText),
+                          labelStyle: GoogleFonts.poppins(
+                            color: AppColors.secondaryText,
+                          ),
 
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
 
-                            borderSide: const BorderSide(color: AppColors.primaryColor),
+                            borderSide: const BorderSide(
+                              color: AppColors.primaryColor,
+                            ),
                           ),
 
                           focusedBorder: OutlineInputBorder(
@@ -122,7 +128,9 @@ class _LoginPageState extends State<LoginPage> {
 
                         obscureText: true,
 
-                        style: GoogleFonts.poppins(color: AppColors.primaryText),
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primaryText,
+                        ),
 
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -139,12 +147,16 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'Senha',
 
-                          labelStyle: GoogleFonts.poppins(color: AppColors.secondaryText),
+                          labelStyle: GoogleFonts.poppins(
+                            color: AppColors.secondaryText,
+                          ),
 
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
 
-                            borderSide: const BorderSide(color: AppColors.primaryColor),
+                            borderSide: const BorderSide(
+                              color: AppColors.primaryColor,
+                            ),
                           ),
 
                           focusedBorder: OutlineInputBorder(
@@ -197,14 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
 
                         child: state is AuthLoading
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  color: AppColors.primaryText,
-                                  strokeWidth: 2,
-                                ),
-                              )
+                            ? const CircularProgressIndicator()
                             : Text(
                                 'Logar',
 
@@ -226,7 +231,9 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         'Criar uma conta',
 
-                        style: GoogleFonts.poppins(color: AppColors.secondaryText),
+                        style: GoogleFonts.poppins(
+                          color: AppColors.secondaryText,
+                        ),
                       ),
                     ),
                   ],
