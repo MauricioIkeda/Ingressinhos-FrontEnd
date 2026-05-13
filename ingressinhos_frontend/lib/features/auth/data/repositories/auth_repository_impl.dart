@@ -1,5 +1,6 @@
 import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:ingressinhos_frontend/features/auth/domain/enums/auth_type.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -14,17 +15,17 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<bool> isLoggedIn() async{
+  Future<AuthType> isLoggedIn() async{
     final token = await storage.getToken();
 
     if(token == null) {
-      return false;
+      return AuthType.notLoggedIn;
     }
 
     final refreshToken = await storage.getRefreshToken();
 
     if(refreshToken == null) {
-      return false;
+      return AuthType.notLoggedIn;
     }
 
     try {
@@ -32,10 +33,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await storage.saveToken(token: newTokens.token, refreshToken: newTokens.refreshToken);
 
-      return true;
+      return AuthType.loggedIn;
     } catch (e) {
-      await storage.clearTokens();
-      return false;
+      return AuthType.loggedInWithServerError;
     }
   }
 

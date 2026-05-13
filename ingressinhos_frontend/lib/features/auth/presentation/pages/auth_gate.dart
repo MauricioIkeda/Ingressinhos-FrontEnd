@@ -12,7 +12,6 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-
         if (state is AuthInitial) {
           return const Scaffold(
             body: Center(
@@ -21,11 +20,11 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        if (state is AuthAuthenticated) {
+        if (state is AuthAuthenticated || state is AuthServerDisconnected) {
           return const HomePage();
         }
 
-        if (state is AuthUnauthenticated || state is AuthLoading || state is AuthError) {
+        if (state is AuthUnauthenticated || state is AuthError || state is AuthLoading) {
           return const LoginPage();
         }
 

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/register_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/auth_exception.dart';
+import 'package:ingressinhos_frontend/features/auth/domain/enums/auth_type.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 
@@ -12,8 +13,10 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> checkAuthentication() async {
     final logged = await authRepository.isLoggedIn();
-    if (logged) {
+    if (logged == AuthType.loggedIn) {
       emit(AuthAuthenticated());
+    } else if (logged == AuthType.loggedInWithServerError) {
+      emit(AuthServerDisconnected());
     } else {
       emit(AuthUnauthenticated());
     }
