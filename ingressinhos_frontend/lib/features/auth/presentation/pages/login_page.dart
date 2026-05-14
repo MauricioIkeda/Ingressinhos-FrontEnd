@@ -45,6 +45,10 @@ class _LoginPageState extends State<LoginPage> {
           if (state is AuthError) {
             showErrorSnackBar(context, state.message, true);
           }
+
+          if (state is AuthServerDisconnected) {
+            showErrorSnackBar(context, 'Não foi possível conectar ao servidor. Tente novamente mais tarde.', true);
+          }
         },
 
         builder: (context, state) {

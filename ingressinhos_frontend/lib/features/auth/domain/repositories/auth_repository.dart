@@ -1,3 +1,5 @@
+import 'package:ingressinhos_frontend/features/auth/domain/enums/auth_type.dart';
+
 abstract class AuthRepository {
   Future<void> register({
     required String name,
@@ -11,7 +13,7 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<bool> isLoggedIn();
+  Future<AuthType> isLoggedIn();
 
   Future<void> logout();
 }
