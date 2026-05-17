@@ -3,6 +3,7 @@ import 'package:ingressinhos_frontend/core/network/clients/auth_dio_client.dart'
 import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
 import 'package:ingressinhos_frontend/core/network/endpoints.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/auth_exception.dart';
+import 'package:ingressinhos_frontend/features/auth/data/exceptions/mapdioerror.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/entities/auth_tokens.dart';
 
@@ -11,48 +12,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   final IngressinhosDioClient _ingressinhosClient;
 
   AuthRemoteDatasourceImpl(this._authDioClient, this._ingressinhosClient);
-
-  String _mapDioError(DioException e, String fallbackMessage) {
-    if (e.type == DioExceptionType.connectionError) {
-      return 'Nao foi possivel conectar ao servidor';
-    }
-
-    if (e.type == DioExceptionType.connectionTimeout) {
-      return 'Tempo de conexao esgotado';
-    }
-
-    final data = e.response?.data;
-
-    if (data is List && data.isNotEmpty) {
-      final first = data.first;
-
-      if (first is Map && first['mensagem'] != null) {
-        return first['mensagem'].toString();
-      }
-
-      return first.toString();
-    }
-
-    if (data is Map) {
-      if (data['mensagem'] != null) {
-        return data['mensagem'].toString();
-      }
-
-      if (data['message'] != null) {
-        return data['message'].toString();
-      }
-    }
-
-    if (data is String && data.trim().isNotEmpty) {
-      return data;
-    }
-
-    if (e.response?.statusCode != null) {
-      return '$fallbackMessage (HTTP ${e.response?.statusCode})';
-    }
-
-    return fallbackMessage;
-  }
 
   @override
   Future<AuthTokens> login({
@@ -70,12 +29,12 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         refreshToken: response.data['refreshToken'],
       );
     } on DioException catch (e) {
-      throw AuthException(_mapDioError(e, 'Erro ao fazer login'));
+      throw AuthException(mapDioError(e, 'Erro ao fazer login'));
     }
   }
 
   @override
-  Future<void> register({
+  Future<void> registerClient({
     required String name,
     required String email,
     required String password,
@@ -83,11 +42,35 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   }) async {
     try {
       await _ingressinhosClient.dio.post(
-        Endpoints.authRegister,
+        Endpoints.authClientRegister,
         data: {'name': name, 'email': email, 'password': password, 'cpf': cpf},
       );
     } on DioException catch (e) {
-      throw AuthException(_mapDioError(e, 'Erro ao cadastrar usuario'));
+      throw AuthException(mapDioError(e, 'Erro ao cadastrar usuario'));
+    }
+  }
+
+  @override
+  Future<void> registerSeller({
+    required String name,
+    required String email,
+    required String password,
+    required String cnpj,
+    required String tradingName
+  }) async {
+    try {
+      await _ingressinhosClient.dio.post(
+        Endpoints.authSellerRegister,
+        data: {
+          'name': name,
+          'email': email,
+          'password': password,
+          'cnpj': cnpj,
+          'tradingName': tradingName
+        },
+      );
+    } on DioException catch (e) {
+      throw AuthException(mapDioError(e, 'Erro ao cadastrar vendedor'));
     }
   }
 
@@ -107,7 +90,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         refreshToken: response.data['refreshToken'],
       );
     } on DioException catch (e) {
-      throw AuthException(_mapDioError(e, 'Erro ao atualizar token'));
+      throw AuthException(mapDioError(e, 'Erro ao atualizar token'));
     }
   }
 }

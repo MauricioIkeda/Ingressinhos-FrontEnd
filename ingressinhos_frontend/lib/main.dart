@@ -4,7 +4,9 @@ import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/auth_gate.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_page.dart';
-import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_page.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_client_page.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_seller_page.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
 
 void main() {
@@ -18,15 +20,23 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<AuthCubit>()..checkAuthentication(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>(
+          create: (_) => getIt<AuthCubit>()..checkAuthentication(),
+        ),
+
+        BlocProvider<EventsCubit>(
+          create: (_) => getIt<EventsCubit>(),
+         ),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: AuthGate(),
-
         routes: {
           '/login': (context) => LoginPage(),
-          '/register': (context) => RegisterPage(),
+          '/registerclient': (context) => RegisterClientPage(),
+          '/registerseller': (context) => RegisterSellerPage(),
           '/home': (context) => HomePage(),
         },
       ),

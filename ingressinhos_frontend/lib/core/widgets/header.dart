@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
+import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 
 class IngressinhosAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -54,13 +56,31 @@ class IngressinhosDrawer extends StatelessWidget {
                       children: [
                         CircleAvatar(),
                         SizedBox(width: 16),
-                        Text(
-                          'Mauricio Ikeda',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.primaryText,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        FutureBuilder<String?>(
+                          future: getIt<SecureStorageService>().getUserNameFromToken(),
+                          builder: (context, snapshot) {
+                            final name = snapshot.data ?? 'Usuário';
+
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Text(
+                                'Carregando...',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.primaryText,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              );
+                            }
+
+                            return Text(
+                              name,
+                              style: GoogleFonts.poppins(
+                                color: AppColors.primaryText,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

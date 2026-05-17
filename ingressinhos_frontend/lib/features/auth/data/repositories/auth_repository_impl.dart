@@ -52,7 +52,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> register({required String name, required String email, required String password, required String cpf}) async {
-    await remoteDatasource.register(name: name, email: email, password: password, cpf: cpf);
+  Future<void> registerClient({required String name, required String email, required String password, required String cpf}) async {
+    await remoteDatasource.registerClient(name: name, email: email, password: password, cpf: cpf);
+  }
+
+  @override
+  Future<void> registerSeller({required String name, required String email, required String password, required String cnpj, required String tradingName}) async {
+    await remoteDatasource.registerSeller(name: name, email: email, password: password, cnpj: cnpj, tradingName: tradingName);
   }
 }

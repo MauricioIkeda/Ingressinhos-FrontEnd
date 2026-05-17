@@ -1,11 +1,19 @@
 import 'package:ingressinhos_frontend/features/auth/domain/enums/auth_type.dart';
 
 abstract class AuthRepository {
-  Future<void> register({
+  Future<void> registerClient({
     required String name,
     required String email,
     required String password,
     required String cpf,
+  });
+
+  Future<void> registerSeller({
+    required String name,
+    required String email,
+    required String password,
+    required String cnpj,
+    required String tradingName
   });
 
   Future<void> login({

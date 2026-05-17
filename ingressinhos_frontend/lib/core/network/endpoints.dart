@@ -14,9 +14,12 @@ class Endpoints {
   static String get ingressinhosBaseUrl => 'http://$baseHost:5202';
   static String get authBaseUrl => 'http://$baseHost:5254';
 
-  static const authRegister = '/api/clients'; // Para cadastrar usuarios
+  static const authClientRegister = '/api/clients'; // Para cadastrar usuarios
+  static const authSellerRegister = '/api/sellers'; // Para cadastrar vendedores
   static const authLogin = '/api/auth/login'; // Para logar usuarios e obter token
   static const authRefreshToken = '/api/auth/refresh'; // Para dar refresh no token que esta vencido
 
   // API Ingressinhos
+  static const eventos = '/api/events'; // Para buscar eventos
+  static const locations = '/api/locations'; // Para buscar localizações
 }

@@ -5,34 +5,37 @@ import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/services.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
-import 'package:ingressinhos_frontend/features/auth/data/models/register_user_model.dart';
+import 'package:ingressinhos_frontend/features/auth/data/models/register_user_seller_model.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegisterSellerPage extends StatefulWidget {
+  const RegisterSellerPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterSellerPage> createState() => _RegisterSellerPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterSellerPageState extends State<RegisterSellerPage> {
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
 
   final emailController = TextEditingController();
 
-  final cpfController = TextEditingController();
+  final cnpjController = TextEditingController();
 
   final passwordController = TextEditingController();
+
+  final tradingNameController = TextEditingController();
 
   @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();
-    cpfController.dispose();
+    cnpjController.dispose();
     passwordController.dispose();
+    tradingNameController.dispose();
 
     super.dispose();
   }
@@ -47,7 +50,11 @@ class _RegisterPageState extends State<RegisterPage> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthRegisterSuccess) {
-            showErrorSnackBar(context, 'Usuário cadastrado com sucesso!', false);
+            showErrorSnackBar(
+              context,
+              'Usuário cadastrado com sucesso!',
+              false,
+            );
 
             Navigator.pushReplacementNamed(context, '/login');
           }
@@ -86,7 +93,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: TextFormField(
                           controller: nameController,
 
-                          style: GoogleFonts.poppins(color: AppColors.primaryText),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryText,
+                          ),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -106,7 +115,55 @@ class _RegisterPageState extends State<RegisterPage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: AppColors.primaryColor),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryFocus,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      space,
+                      SizedBox(
+                        width: 300,
+
+                        child: TextFormField(
+                          controller: tradingNameController,
+
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryText,
+                          ),
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Nome comercial obrigatório';
+                            }
+
+                            return null;
+                          },
+
+                          decoration: InputDecoration(
+                            labelText: 'Nome Comercial',
+
+                            labelStyle: GoogleFonts.poppins(
+                              color: AppColors.secondaryText,
+                            ),
+
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
                             ),
 
                             focusedBorder: OutlineInputBorder(
@@ -129,7 +186,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: TextFormField(
                           controller: emailController,
 
-                          style: GoogleFonts.poppins(color: AppColors.primaryText),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryText,
+                          ),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -153,7 +212,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: AppColors.primaryColor),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
                             ),
 
                             focusedBorder: OutlineInputBorder(
@@ -174,27 +235,29 @@ class _RegisterPageState extends State<RegisterPage> {
                         width: 300,
 
                         child: TextFormField(
-                          controller: cpfController,
+                          controller: cnpjController,
 
                           keyboardType: TextInputType.number,
 
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            CpfInputFormatter(),
+                            CnpjInputFormatter(),
                           ],
 
-                          style: GoogleFonts.poppins(color: AppColors.primaryText),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryText,
+                          ),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'CPF obrigatório';
+                              return 'CNPJ obrigatório';
                             }
 
                             return null;
                           },
 
                           decoration: InputDecoration(
-                            labelText: 'CPF',
+                            labelText: 'CNPJ',
 
                             labelStyle: GoogleFonts.poppins(
                               color: AppColors.secondaryText,
@@ -203,7 +266,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: AppColors.primaryColor),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
                             ),
 
                             focusedBorder: OutlineInputBorder(
@@ -228,7 +293,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                           obscureText: true,
 
-                          style: GoogleFonts.poppins(color: AppColors.primaryText),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primaryText,
+                          ),
 
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -252,7 +319,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
 
-                              borderSide: const BorderSide(color: AppColors.primaryColor),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
                             ),
 
                             focusedBorder: OutlineInputBorder(
@@ -283,15 +352,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                     return;
                                   }
 
-                                  final userModel = RegisterUserModel(
-                                    name: nameController.text,
-                                    email: emailController.text,
-                                    cpf: cpfController.text,
-                                    password: passwordController.text,
-                                  );
+                                  final userSellerModel =
+                                      RegisterUserSellerModel(
+                                        name: nameController.text,
+                                        email: emailController.text,
+                                        cnpj: cnpjController.text,
+                                        tradingName: tradingNameController.text,
+                                        password: passwordController.text,
+                                      );
 
-                                  context.read<AuthCubit>().register(
-                                    registerUserModel: userModel,
+                                  context.read<AuthCubit>().registerSeller(
+                                    registerUserModel: userSellerModel,
                                   );
                                 },
 
@@ -329,7 +400,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Text(
                           'Fazer login',
 
-                          style: GoogleFonts.poppins(color: AppColors.secondaryText),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.secondaryText,
+                          ),
                         ),
                       ),
                     ],

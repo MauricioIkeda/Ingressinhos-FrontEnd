@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
-import 'package:ingressinhos_frontend/features/auth/data/models/register_user_model.dart';
+import 'package:ingressinhos_frontend/features/auth/data/models/register_user_client_model.dart';
+import 'package:ingressinhos_frontend/features/auth/data/models/register_user_seller_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/auth_exception.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/enums/auth_type.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
@@ -22,15 +23,36 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> register({required RegisterUserModel registerUserModel}) async {
+  Future<void> registerClient({
+    required RegisterUserClientModel registerUserModel,
+  }) async {
     emit(AuthLoading());
 
     try {
-      await authRepository.register(
+      await authRepository.registerClient(
         name: registerUserModel.name,
         email: registerUserModel.email,
         password: registerUserModel.password,
         cpf: registerUserModel.cpf,
+      );
+      emit(AuthRegisterSuccess());
+    } catch (e) {
+      emit(AuthError(_mapError(e)));
+    }
+  }
+
+  Future<void> registerSeller({
+    required RegisterUserSellerModel registerUserModel,
+  }) async {
+    emit(AuthLoading());
+
+    try {
+      await authRepository.registerSeller(
+        name: registerUserModel.name,
+        email: registerUserModel.email,
+        password: registerUserModel.password,
+        cnpj: registerUserModel.cnpj,
+        tradingName: registerUserModel.tradingName,
       );
       emit(AuthRegisterSuccess());
     } catch (e) {
