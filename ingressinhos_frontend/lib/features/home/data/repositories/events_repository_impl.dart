@@ -1,3 +1,4 @@
+import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 import 'package:ingressinhos_frontend/features/home/data/datasource/ingressinhos_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/home/domain/repositories/events_repository.dart';
 
@@ -29,7 +30,7 @@ class EventsRepositoryImpl implements EventsRepository {
 
       if (locationId is int) {
         final location = await _getLocation(locationId);
-        event['locationLabel'] = _buildLocationLabel(location, locationId);
+        event['locationLabel'] = location['name']?.toString().trim();
         event['locationData'] = location;
       }
 
@@ -37,6 +38,11 @@ class EventsRepositoryImpl implements EventsRepository {
     }
 
     return resolvedEvents;
+  }
+
+  @override
+  Future<List<LocationModel>> getAllLocations() async {
+    return await remoteDatasource.getAllLocations();
   }
 
   Future<Map<String, dynamic>> _getLocation(int id) async {
@@ -48,24 +54,5 @@ class EventsRepositoryImpl implements EventsRepository {
     final location = await remoteDatasource.getLocationById(id);
     _locationCache[id] = location;
     return location;
-  }
-
-  String _buildLocationLabel(Map<String, dynamic> location, int id) {
-    final name = location['name']?.toString().trim();
-    if (name != null && name.isNotEmpty) {
-      return name;
-    }
-
-    final address = location['address']?.toString().trim();
-    if (address != null && address.isNotEmpty) {
-      return address;
-    }
-
-    final city = location['city']?.toString().trim();
-    if (city != null && city.isNotEmpty) {
-      return city;
-    }
-
-    return 'Local $id';
   }
 }

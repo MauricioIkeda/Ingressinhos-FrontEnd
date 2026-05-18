@@ -21,3 +21,7 @@ class EventsError extends EventsState {
 
   const EventsError(this.message);
 }
+
+class EventCreating extends EventsState {
+  const EventCreating();
+}

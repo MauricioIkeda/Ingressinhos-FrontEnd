@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
-import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
-import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_state.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/list_events_page.dart';
 
 class HomePage extends StatelessWidget {

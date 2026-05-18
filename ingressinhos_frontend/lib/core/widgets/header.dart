@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ingressinhos_frontend/core/data/models/user_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
 import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
@@ -38,113 +39,147 @@ class IngressinhosDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final storage = getIt<SecureStorageService>();
+
     return Drawer(
       backgroundColor: AppColors.backgroundColor,
       child: Column(
         children: [
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: AppColors.appBarBackgroundColor,
-                  ),
-                  child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(),
-                        SizedBox(width: 16),
-                        FutureBuilder<String?>(
-                          future: getIt<SecureStorageService>().getUserNameFromToken(),
-                          builder: (context, snapshot) {
-                            final name = snapshot.data ?? 'Usuário';
+            child: FutureBuilder<UserModel?>(
+              future: storage.getUserFromToken(),
+              builder: (context, snapshot) {
+                final user = snapshot.data;
+                final isSeller = user?.role == 'Seller';
 
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Text(
-                                'Carregando...',
-                                style: GoogleFonts.poppins(
-                                  color: AppColors.primaryText,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              );
-                            }
-
-                            return Text(
-                              name,
-                              style: GoogleFonts.poppins(
-                                color: AppColors.primaryText,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                return ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: AppColors.appBarBackgroundColor,
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircleAvatar(
+                              radius: 32,
+                              backgroundColor: Colors.white,
+                              child: Icon(
+                                Icons.person,
+                                size: 40,
+                                color: AppColors.primaryColor,
                               ),
-                            );
-                          },
+                            ),
+                            const SizedBox(width: 16),
+                            _buildUserInfo(snapshot, user),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.home, color: AppColors.primaryText),
-                  title: Text(
-                    'Home',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.primaryText,
-                      fontSize: 18,
+
+                    _buildMenuItem(
+                      Icons.home,
+                      'Home',
+                      () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
                     ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.confirmation_num_sharp, color: AppColors.primaryText),
-                  title: Text(
-                    'Meus Ingressos',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.primaryText,
-                      fontSize: 18,
+                    _buildMenuItem(
+                      Icons.confirmation_num_sharp,
+                      'Meus Ingressos',
+                      () => Navigator.pop(context),
                     ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.settings, color: AppColors.primaryText),
-                  title: Text(
-                    'Configurações',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.primaryText,
-                      fontSize: 18,
+
+                    if (isSeller)
+                      _buildMenuItem(
+                        Icons.add_circle_outline,
+                        'Cadastrar Evento',
+                        () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/registerevent');
+                        },
+                      ),
+
+                    _buildMenuItem(
+                      Icons.settings,
+                      'Configurações',
+                      () => Navigator.pop(context),
                     ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
-          Divider(color: AppColors.secondaryText.withOpacity(0.3), height: 1),
-          ListTile(
-            leading: Icon(Icons.exit_to_app, color: AppColors.primaryText),
-            title: Text(
-              'Deslogar',
-              style: GoogleFonts.poppins(
-                color: AppColors.primaryText,
-                fontSize: 18,
-              ),
-            ),
-            onTap: () {
-              onLogout?.call();
-            },
-          ),
-          SizedBox(height: 8),
+
+          const Divider(color: Colors.grey, height: 1),
+          _buildMenuItem(Icons.exit_to_app, 'Deslogar', () => onLogout?.call()),
+          const SizedBox(height: 8),
         ],
       ),
     );
   }
+
+  Widget _buildUserInfo(AsyncSnapshot<UserModel?> snapshot, UserModel? user) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Text(
+        'Carregando...',
+        style: TextStyle(fontSize: 18, color: AppColors.primaryText),
+      );
+    }
+
+    final name = user?.name ?? 'Usuário';
+    final role = user?.role ?? '';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: GoogleFonts.poppins(
+            color: AppColors.primaryText,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        if (role.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: role == 'Seller'
+                  ? Colors.orange.withOpacity(0.25)
+                  : Colors.blue.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              role,
+              style: GoogleFonts.poppins(
+                color: role == 'Seller' ? Colors.orange[700] : Colors.blue[700],
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  ListTile _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primaryText),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(color: AppColors.primaryText, fontSize: 18),
+      ),
+      onTap: onTap,
+    );
+  }
 }
+
+TextStyle _menuStyle() =>
+    GoogleFonts.poppins(color: AppColors.primaryText, fontSize: 18);

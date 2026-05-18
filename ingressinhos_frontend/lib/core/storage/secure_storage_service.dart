@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:ingressinhos_frontend/core/data/models/user_model.dart';
 
 class SecureStorageService {
   final storage = const FlutterSecureStorage();
@@ -29,18 +30,22 @@ class SecureStorageService {
     final payload = parts[1];
     final normalized = base64Url.normalize(payload);
     final decoded = utf8.decode(base64Url.decode(normalized));
-    final payloadMap = json.decode(decoded) as Map<String, dynamic>;
-    return payloadMap;
+    return json.decode(decoded) as Map<String, dynamic>;
   }
 
-  Future<String?> getUserNameFromToken() async {
+  Future<UserModel?> getUserFromToken() async {
     final token = await getToken();
     if (token == null) return null;
 
     try {
       final payload = _parseJwtPayload(token);
 
-      return payload['unique_name'] as String;
+      final name = payload['unique_name'] as String?;
+      final role = payload['role'] as String?;
+
+      if (name == null || role == null) return null;
+
+      return UserModel(name: name, role: role);
     } catch (_) {
       return null;
     }

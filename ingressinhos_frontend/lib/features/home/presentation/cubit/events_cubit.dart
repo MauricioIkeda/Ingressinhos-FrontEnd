@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
+import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/ingressinhos_exception.dart';
 import 'package:ingressinhos_frontend/features/home/domain/repositories/events_repository.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_state.dart';
@@ -20,6 +22,25 @@ class EventsCubit extends Cubit<EventsState> {
       emit(EventsError(e.message));
     } catch (e) {
       emit(EventsError(e.toString().replaceFirst('Exception: ', '')));
+    }
+  }
+
+  Future<void> createEvent(EventModel event) async{
+    emit (const EventCreating());
+
+    // Terminar de fazer, pq agora irei jogar gachaa
+  }
+
+  Future<List<LocationModel>> loadLocations() async {
+    try {
+      final locations = await _repository.getAllLocations();
+      return locations;
+    } on IngressinhosException catch (e) {
+      emit(EventsError(e.message));
+      return List<LocationModel>.empty();
+    } catch (e) {
+      emit(EventsError(e.toString().replaceFirst('Exception: ', '')));
+      return List<LocationModel>.empty();
     }
   }
 }

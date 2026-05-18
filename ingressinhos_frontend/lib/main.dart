@@ -8,6 +8,7 @@ import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_seller_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/register_event_page.dart';
 
 void main() {
   setup();
@@ -37,6 +38,7 @@ class MainApp extends StatelessWidget {
           '/login': (context) => LoginPage(),
           '/registerclient': (context) => RegisterClientPage(),
           '/registerseller': (context) => RegisterSellerPage(),
+          '/registerevent': (context) => RegisterEventPage(),
           '/home': (context) => HomePage(),
         },
       ),

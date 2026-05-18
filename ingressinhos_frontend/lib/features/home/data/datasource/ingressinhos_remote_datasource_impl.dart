@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
 import 'package:ingressinhos_frontend/core/network/endpoints.dart';
 import 'package:ingressinhos_frontend/features/home/data/datasource/ingressinhos_remote_datasource.dart';
@@ -52,6 +53,29 @@ class IngressinhosRemoteDatasourceImpl implements IngressinhosRemoteDatasource {
       throw IngressinhosException('Resposta de localização inválida');
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao buscar localização'));
+    }
+  }
+
+  @override
+  Future<List<LocationModel>> getAllLocations() async {
+    try {
+      final response = await _ingressinhosClient.dio.get(Endpoints.locations);
+      final data = response.data;
+
+      if (data is Map<String, dynamic>) {
+        final payload = data['data'];
+        if (payload is List) {
+          final teste = payload
+              .whereType<Map<String, dynamic>>()
+              .map((json) => LocationModel.fromJson(json))
+              .toList();
+          return teste;
+        }
+      }
+
+      throw IngressinhosException('Resposta de localizações inválida');
+    } on DioException catch (e) {
+      throw IngressinhosException(mapDioError(e, 'Erro ao buscar localizações'));
     }
   }
 }

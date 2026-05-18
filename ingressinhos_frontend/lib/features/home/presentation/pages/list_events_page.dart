@@ -50,7 +50,7 @@ class _ListEventPageState extends State<ListEventPage> {
                 'Nenhum evento encontrado.',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
-                  color: Colors.black54,
+                  color: Colors.grey,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -61,9 +61,9 @@ class _ListEventPageState extends State<ListEventPage> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.72,
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
+              childAspectRatio: 0.50,
             ),
             itemCount: state.events.length,
             itemBuilder: (context, index) {
@@ -73,16 +73,7 @@ class _ListEventPageState extends State<ListEventPage> {
           );
         }
 
-        return Center(
-          child: Text(
-            'Nenhum evento encontrado.',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.black54,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        );
+        return const Center(child: Text('Nenhum evento encontrado.'));
       },
     );
   }
@@ -91,151 +82,183 @@ class _ListEventPageState extends State<ListEventPage> {
 class _EventCard extends StatelessWidget {
   final Map<String, dynamic> event;
 
-  const _EventCard({required this.event});
+  const _EventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     final title = (event['name'] as String?)?.trim().isNotEmpty == true
         ? event['name'] as String
-        : 'Sem nome';
-    final description =
-        (event['description'] as String?)?.trim().isNotEmpty == true
+        : 'Evento sem nome';
+
+    final description = (event['description'] as String?)?.trim().isNotEmpty == true
         ? event['description'] as String
-        : 'Sem descrição';
+        : 'Sem descrição disponível';
+
     final imageUrl = event['imageUrl'] as String?;
     final startTime = _formatDate(event['startTime'] as String?);
     final hasSeats = event['hasSeats'] == true;
-    final locationLabel =
-        (event['locationLabel'] as String?)?.trim().isNotEmpty == true
+    final locationLabel = (event['locationLabel'] as String?)?.trim().isNotEmpty == true
         ? event['locationLabel'] as String
         : 'Local ${event['locationId'] ?? '-'}';
 
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _EventImage(imageUrl: imageUrl),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.35),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 12,
-                  top: 12,
-                  child: _Badge(
-                    text: hasSeats ? 'Com vagas' : 'Lotado',
-                    backgroundColor: hasSeats
-                        ? Colors.green.withOpacity(0.92)
-                        : Colors.redAccent.withOpacity(0.92),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    final cardBackground = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700;
+
+    return GestureDetector(
+      onTap: () {
+      },
+      child: Card(
+        elevation: 12,
+        shadowColor: Colors.black.withOpacity(0.4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        clipBehavior: Clip.antiAlias,
+        color: cardBackground,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 4,
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryColor,
-                      height: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    startTime,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    description,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.black87,
-                      height: 1.35,
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.place_outlined,
-                        size: 16,
-                        color: Colors.black45,
+                  _EventImage(imageUrl: imageUrl),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.78),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          locationLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                  ),
+
+                  Positioned(
+                    top: 14,
+                    left: 14,
+                    child: _Badge(
+                      text: hasSeats ? 'COM VAGAS' : 'LOTADO',
+                      backgroundColor: hasSeats
+                          ? const Color(0xFF22C55E)
+                          : const Color(0xFFEF4444),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+
+            Expanded(
+              flex: 7,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 17.5,
+                        fontWeight: FontWeight.w700,
+                        height: 1.15,
+                        color: isDarkMode ? Colors.white : AppColors.primaryColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      startTime,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    Expanded(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white,
+                            Colors.white,
+                            Colors.white.withOpacity(0.0),
+                          ],
+                          stops: const [0.0, 0.75, 1.0],
+                        ).createShader(bounds),
+                        blendMode: BlendMode.dstIn,
+                        child: SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: Text(
+                            description,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.5,
+                              height: 1.55,
+                              color: secondaryTextColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.place_rounded,
+                          size: 18,
+                          color: secondaryTextColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            locationLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.5,
+                              color: secondaryTextColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   String _formatDate(String? isoDate) {
-    if (isoDate == null || isoDate.isEmpty) {
-      return 'Sem data';
-    }
+    if (isoDate == null || isoDate.isEmpty) return 'Sem data';
 
     try {
       final date = DateTime.parse(isoDate).toLocal();
       final day = date.day.toString().padLeft(2, '0');
       final month = date.month.toString().padLeft(2, '0');
-      final year = date.year;
       final hour = date.hour.toString().padLeft(2, '0');
       final minute = date.minute.toString().padLeft(2, '0');
 
-      return '$day/$month/$year • $hour:$minute';
+      return '$day/$month • $hour:$minute';
     } catch (_) {
       return isoDate;
     }
@@ -245,26 +268,21 @@ class _EventCard extends StatelessWidget {
 class _EventImage extends StatelessWidget {
   final String? imageUrl;
 
-  const _EventImage({required this.imageUrl});
+  const _EventImage({super.key, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
-
-    if (!hasImage) {
+    if (imageUrl == null || imageUrl!.isEmpty) {
       return Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              AppColors.primaryColor.withOpacity(0.85),
-              AppColors.primaryColor.withOpacity(0.55),
-            ],
+            colors: [AppColors.primaryColor, AppColors.primaryColor.withOpacity(0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: const Center(
-          child: Icon(Icons.event, color: Colors.white, size: 48),
+          child: Icon(Icons.event_rounded, color: Colors.white, size: 52),
         ),
       );
     }
@@ -272,28 +290,17 @@ class _EventImage extends StatelessWidget {
     return Image.network(
       imageUrl!,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          color: Colors.grey.shade200,
-          child: const Center(
-            child: Icon(
-              Icons.broken_image_outlined,
-              color: Colors.black38,
-              size: 40,
-            ),
-          ),
-        );
-      },
-      loadingBuilder: (context, child, loadingProgress) {
+      errorBuilder: (_, __, ___) => Container(
+        color: Colors.grey.shade800,
+        child: const Center(
+          child: Icon(Icons.broken_image_rounded, size: 48, color: Colors.grey),
+        ),
+      ),
+      loadingBuilder: (_, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(
-          color: Colors.grey.shade100,
-          child: Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
-            ),
-          ),
+          color: Colors.grey.shade900,
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 3)),
         );
       },
     );
@@ -304,31 +311,30 @@ class _Badge extends StatelessWidget {
   final String text;
   final Color backgroundColor;
 
-  const _Badge({required this.text, required this.backgroundColor});
+  const _Badge({super.key, required this.text, required this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 8,
+            color: backgroundColor.withOpacity(0.5),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Text(
-          text,
-          style: GoogleFonts.poppins(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+          letterSpacing: 0.6,
         ),
       ),
     );
