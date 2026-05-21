@@ -1,43 +1,38 @@
+import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
-import 'package:ingressinhos_frontend/features/home/data/datasource/ingressinhos_remote_datasource.dart';
+import 'package:ingressinhos_frontend/core/data/datasource/ingressinhos_local_datasource.dart';
+import 'package:ingressinhos_frontend/features/home/data/datasource/events_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/home/domain/repositories/events_repository.dart';
 
 class EventsRepositoryImpl implements EventsRepository {
-  final IngressinhosRemoteDatasource remoteDatasource;
-  final Map<int, Map<String, dynamic>> _locationCache = {};
+  final EventsRemoteDatasource remoteDatasource;
 
   EventsRepositoryImpl({required this.remoteDatasource});
 
   @override
-  Future<List<dynamic>> getEvents() async {
-    return await remoteDatasource.getEvents();
-  }
-
-  @override
-  Future<List<dynamic>> getEventsWithLocations() async {
-    final events = await getEvents();
-
-    final resolvedEvents = <dynamic>[];
-
-    for (final rawEvent in events) {
-      if (rawEvent is! Map) {
-        resolvedEvents.add(rawEvent);
-        continue;
+  Future<List<EventModel>> getEvents() async {
+    try {
+      List<EventModel> eventsData = await remoteDatasource.getEvents();
+      for (final event in eventsData) {
+        if (event.location != null) {
+          final locationId = event.location!.id;
+          if (IngressinhosLocalDatasource.locationCache.containsKey(
+            locationId,
+          )) {
+            event.location =
+                IngressinhosLocalDatasource.locationCache[locationId];
+          } else {
+            final location = await remoteDatasource.getLocationById(locationId);
+            IngressinhosLocalDatasource.locationCache[locationId] = location;
+            event.location = location;
+          }
+        }
       }
 
-      final event = Map<String, dynamic>.from(rawEvent);
-      final locationId = event['locationId'];
-
-      if (locationId is int) {
-        final location = await _getLocation(locationId);
-        event['locationLabel'] = location['name']?.toString().trim();
-        event['locationData'] = location;
-      }
-
-      resolvedEvents.add(event);
+      return eventsData;
+    } on Exception catch (e) {
+      throw Exception('Erro ao buscar eventos: ${e.toString()}');
     }
-
-    return resolvedEvents;
   }
 
   @override
@@ -45,14 +40,15 @@ class EventsRepositoryImpl implements EventsRepository {
     return await remoteDatasource.getAllLocations();
   }
 
-  Future<Map<String, dynamic>> _getLocation(int id) async {
-    final cached = _locationCache[id];
+  @override
+  Future<LocationModel> getLocationWithId(int id) async {
+    final cached = IngressinhosLocalDatasource.locationCache[id];
     if (cached != null) {
       return cached;
     }
 
     final location = await remoteDatasource.getLocationById(id);
-    _locationCache[id] = location;
+    IngressinhosLocalDatasource.locationCache[id] = location;
     return location;
   }
 }

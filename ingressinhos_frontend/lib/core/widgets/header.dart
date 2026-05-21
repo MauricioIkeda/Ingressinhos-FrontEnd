@@ -7,7 +7,7 @@ import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 
 class IngressinhosAppBar extends StatelessWidget
     implements PreferredSizeWidget {
-  const IngressinhosAppBar({Key? key}) : super(key: key);
+  const IngressinhosAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class IngressinhosAppBar extends StatelessWidget
 }
 
 class IngressinhosDrawer extends StatelessWidget {
-  const IngressinhosDrawer({Key? key, this.onLogout}) : super(key: key);
+  const IngressinhosDrawer({super.key, this.onLogout});
 
   final VoidCallback? onLogout;
 
@@ -180,6 +180,3 @@ class IngressinhosDrawer extends StatelessWidget {
     );
   }
 }
-
-TextStyle _menuStyle() =>
-    GoogleFonts.poppins(color: AppColors.primaryText, fontSize: 18);

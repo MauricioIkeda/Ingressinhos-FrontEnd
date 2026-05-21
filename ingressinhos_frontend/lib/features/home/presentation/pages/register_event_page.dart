@@ -67,10 +67,11 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     );
 
     setState(() {
-      if (isStart)
+      if (isStart) {
         startDate = dateTime;
-      else
+      } else {
         endDate = dateTime;
+      }
     });
   }
 
@@ -105,160 +106,180 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       appBar: const IngressinhosAppBar(),
       drawer: const IngressinhosDrawer(),
       backgroundColor: AppColors.backgroundColor,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Cadastrar Evento',
-                  style: GoogleFonts.poppins(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                _buildTextField(
-                  'Nome do Evento',
-                  nameController,
-                  isRequired: true,
-                ),
-
-                space,
-
-                _buildDateTimeField(
-                  label: 'Data e Hora de Início',
-                  selectedDate: startDate,
-                  onTap: () => _selectDateTime(true),
-                ),
-
-                space,
-
-                _buildDateTimeField(
-                  label: 'Data e Hora de Término',
-                  selectedDate: endDate,
-                  onTap: () => _selectDateTime(false),
-                ),
-
-                space,
-
-                SizedBox(
-                  width: 300,
-                  child: DropdownButtonFormField<int>(
-                    value: selectedLocationId,
-                    isExpanded: true, // ← importante para não cortar o texto
-                    decoration: InputDecoration(
-                      labelText: 'Localização',
-                      labelStyle: GoogleFonts.poppins(
-                        color: AppColors.secondaryText,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+                minWidth: constraints.maxWidth,
+              ),
+              child: Center(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        'Cadastrar Evento',
+                        style: GoogleFonts.poppins(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
                           color: AppColors.primaryColor,
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AppColors.primaryFocus,
-                          width: 2,
-                        ),
+
+                      const SizedBox(height: 30),
+
+                      _buildTextField(
+                        'Nome do Evento',
+                        nameController,
+                        isRequired: true,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+
+                      space,
+
+                      _buildDateTimeField(
+                        label: 'Data e Hora de Início',
+                        selectedDate: startDate,
+                        onTap: () => _selectDateTime(true),
                       ),
-                    ),
-                    icon: const Icon(
-                      Icons.arrow_drop_down,
-                      color: AppColors.primaryColor,
-                    ),
-                    dropdownColor:
-                        AppColors.backgroundColor, // fundo do dropdown
-                    style: GoogleFonts.poppins(
-                      color: AppColors.primaryText,
-                      fontSize: 16,
-                    ),
-                    items: locations.map((loc) {
-                      return DropdownMenuItem<int>(
-                        value: loc.id,
-                        child: Text(
-                          loc.name,
+
+                      space,
+
+                      _buildDateTimeField(
+                        label: 'Data e Hora de Término',
+                        selectedDate: endDate,
+                        onTap: () => _selectDateTime(false),
+                      ),
+
+                      space,
+
+                      SizedBox(
+                        width: 300,
+                        child: DropdownButtonFormField<int>(
+                          initialValue: selectedLocationId,
+                          isExpanded:
+                              true, // ← importante para não cortar o texto
+                          decoration: InputDecoration(
+                            labelText: 'Localização',
+                            labelStyle: GoogleFonts.poppins(
+                              color: AppColors.secondaryText,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryFocus,
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.primaryColor,
+                          ),
+                          dropdownColor:
+                              AppColors.backgroundColor, // fundo do dropdown
                           style: GoogleFonts.poppins(
                             color: AppColors.primaryText,
                             fontSize: 16,
                           ),
+                          items: locations.map((loc) {
+                            return DropdownMenuItem<int>(
+                              value: loc.id,
+                              child: Text(
+                                loc.name,
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.primaryText,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) =>
+                              setState(() => selectedLocationId = value),
+                          validator: (value) =>
+                              value == null ? 'Selecione um local' : null,
                         ),
-                      );
-                    }).toList(),
-                    onChanged: (value) =>
-                        setState(() => selectedLocationId = value),
-                    validator: (value) =>
-                        value == null ? 'Selecione um local' : null,
-                  ),
-                ),
-
-                space,
-
-                SizedBox(
-                  width: 300,
-                  child: SwitchListTile(
-                    title: Text(
-                      'Evento com assentos',
-                      style: GoogleFonts.poppins(color: AppColors.primaryText),
-                    ),
-                    value: hasSeats,
-                    onChanged: (val) => setState(() => hasSeats = val),
-                    activeColor: AppColors.primaryColor,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-
-                space,
-
-                _buildTextField(
-                  'Descrição (opcional)',
-                  descriptionController,
-                  maxLines: 4,
-                ),
-
-                space,
-
-                _buildTextField('URL da Imagem (opcional)', imageUrlController),
-
-                const SizedBox(height: 40),
-
-                SizedBox(
-                  width: 300,
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.primaryText,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    child: Text(
-                      'Cadastrar Evento',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+
+                      space,
+
+                      SizedBox(
+                        width: 300,
+                        child: SwitchListTile(
+                          title: Text(
+                            'Evento com assentos',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.primaryText,
+                            ),
+                          ),
+                          value: hasSeats,
+                          onChanged: (val) => setState(() => hasSeats = val),
+                          activeThumbColor: AppColors.primaryColor,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
-                    ),
+
+                      space,
+
+                      _buildTextField(
+                        'Descrição (opcional)',
+                        descriptionController,
+                        maxLines: 4,
+                      ),
+
+                      space,
+
+                      _buildTextField(
+                        'URL da Imagem (opcional)',
+                        imageUrlController,
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      SizedBox(
+                        width: 300,
+                        child: ElevatedButton(
+                          onPressed: _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: AppColors.primaryText,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Cadastrar Evento',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

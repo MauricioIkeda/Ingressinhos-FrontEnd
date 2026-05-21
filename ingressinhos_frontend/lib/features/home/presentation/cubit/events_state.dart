@@ -1,3 +1,5 @@
+import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
+
 abstract class EventsState {
   const EventsState();
 }
@@ -11,7 +13,7 @@ class EventsLoading extends EventsState {
 }
 
 class EventsLoaded extends EventsState {
-  final List<dynamic> events;
+  final List<EventModel> events;
 
   const EventsLoaded(this.events);
 }

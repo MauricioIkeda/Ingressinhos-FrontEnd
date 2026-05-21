@@ -35,6 +35,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return AuthType.loggedIn;
     } catch (e) {
+      print(e);
       return AuthType.loggedInWithServerError;
     }
   }

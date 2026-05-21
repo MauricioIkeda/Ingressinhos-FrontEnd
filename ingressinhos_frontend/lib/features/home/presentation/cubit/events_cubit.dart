@@ -6,17 +6,16 @@ import 'package:ingressinhos_frontend/features/home/domain/repositories/events_r
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_state.dart';
 
 class EventsCubit extends Cubit<EventsState> {
-  final EventsRepository _repository;
+  final EventsRepository _eventRepository;
 
-  EventsCubit({required EventsRepository repository})
-    : _repository = repository,
+  EventsCubit({required EventsRepository eventRepository})
+    : _eventRepository = eventRepository,
       super(const EventsInitial());
 
   Future<void> loadEvents() async {
     emit(const EventsLoading());
-
     try {
-      final events = await _repository.getEventsWithLocations();
+      final List<EventModel> events = await _eventRepository.getEvents();
       emit(EventsLoaded(events));
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));
@@ -33,7 +32,7 @@ class EventsCubit extends Cubit<EventsState> {
 
   Future<List<LocationModel>> loadLocations() async {
     try {
-      final locations = await _repository.getAllLocations();
+      final locations = await _eventRepository.getAllLocations();
       return locations;
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));

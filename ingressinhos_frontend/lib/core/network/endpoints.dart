@@ -22,4 +22,5 @@ class Endpoints {
   // API Ingressinhos
   static const eventos = '/api/events'; // Para buscar eventos
   static const locations = '/api/locations'; // Para buscar localizações
+  static const tickets = '/api/tickets'; // Para buscar tickets
 }

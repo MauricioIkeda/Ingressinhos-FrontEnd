@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_state.dart';
@@ -18,6 +19,7 @@ class _ListEventPageState extends State<ListEventPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EventsCubit>().loadEvents();
+      //context.read<EventsCubit>().loadTickets();
     });
   }
 
@@ -67,7 +69,7 @@ class _ListEventPageState extends State<ListEventPage> {
             ),
             itemCount: state.events.length,
             itemBuilder: (context, index) {
-              final event = state.events[index] as Map<String, dynamic>;
+              final event = state.events[index];
               return _EventCard(event: event);
             },
           );
@@ -80,28 +82,27 @@ class _ListEventPageState extends State<ListEventPage> {
 }
 
 class _EventCard extends StatelessWidget {
-  final Map<String, dynamic> event;
+  final EventModel event;
 
-  const _EventCard({super.key, required this.event});
+  const _EventCard({required this.event});
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final title = (event['name'] as String?)?.trim().isNotEmpty == true
-        ? event['name'] as String
-        : 'Evento sem nome';
+    final title = event.name.trim().isNotEmpty ? event.name : 'Evento sem nome';
 
-    final description = (event['description'] as String?)?.trim().isNotEmpty == true
-        ? event['description'] as String
+    final description = (event.description?.trim().isNotEmpty == true)
+        ? event.description!
         : 'Sem descrição disponível';
 
-    final imageUrl = event['imageUrl'] as String?;
-    final startTime = _formatDate(event['startTime'] as String?);
-    final hasSeats = event['hasSeats'] == true;
-    final locationLabel = (event['locationLabel'] as String?)?.trim().isNotEmpty == true
-        ? event['locationLabel'] as String
-        : 'Local ${event['locationId'] ?? '-'}';
+    final imageUrl = event.imageUrl;
+    final startTime = _formatDate(event.startTime.toIso8601String());
+    final hasSeats = event.hasSeats;
+    final locationLabel = (event.location?.name.trim().isNotEmpty == true)
+        ? event.location!.name
+        : 'Desconhecido';
+    final ticketPrice = event.baseTicketPrice;
 
     final cardBackground = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
@@ -219,6 +220,31 @@ class _EventCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
+                          Icons.confirmation_number_outlined,
+                          size: 18,
+                          color: secondaryTextColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'R\$ ${ticketPrice?.toStringAsFixed(2)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.5,
+                              color: secondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        Icon(
                           Icons.place_rounded,
                           size: 18,
                           color: secondaryTextColor,
@@ -268,7 +294,7 @@ class _EventCard extends StatelessWidget {
 class _EventImage extends StatelessWidget {
   final String? imageUrl;
 
-  const _EventImage({super.key, required this.imageUrl});
+  const _EventImage({required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +316,7 @@ class _EventImage extends StatelessWidget {
     return Image.network(
       imageUrl!,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Container(
+      errorBuilder: (_, _, _) => Container(
         color: Colors.grey.shade800,
         child: const Center(
           child: Icon(Icons.broken_image_rounded, size: 48, color: Colors.grey),
@@ -311,7 +337,7 @@ class _Badge extends StatelessWidget {
   final String text;
   final Color backgroundColor;
 
-  const _Badge({super.key, required this.text, required this.backgroundColor});
+  const _Badge({required this.text, required this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {

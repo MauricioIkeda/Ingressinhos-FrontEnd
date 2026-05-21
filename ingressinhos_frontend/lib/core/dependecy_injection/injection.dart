@@ -4,8 +4,8 @@ import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_clie
 import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/auth/data/datasources/auth_remote_datasource_impl.dart';
-import 'package:ingressinhos_frontend/features/home/data/datasource/ingressinhos_remote_datasource.dart';
-import 'package:ingressinhos_frontend/features/home/data/datasource/ingressinhos_remote_datasource_impl.dart';
+import 'package:ingressinhos_frontend/features/home/data/datasource/events_remote_datasource.dart';
+import 'package:ingressinhos_frontend/features/home/data/datasource/events_remote_datasource_impl.dart';
 import 'package:ingressinhos_frontend/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:ingressinhos_frontend/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
@@ -30,8 +30,8 @@ void setup() {
 
   // Datasources
 
-  getIt.registerLazySingleton<IngressinhosRemoteDatasource>(
-    () => IngressinhosRemoteDatasourceImpl(getIt<IngressinhosDioClient>()),
+  getIt.registerLazySingleton<EventsRemoteDatasource>(
+    () => EventsRemoteDatasourceImpl(getIt<IngressinhosDioClient>()),
   );
 
   getIt.registerLazySingleton<AuthRemoteDatasource>(
@@ -55,12 +55,13 @@ void setup() {
   );
 
   getIt.registerLazySingleton<EventsRepository>(
-    () => EventsRepositoryImpl(
-      remoteDatasource: getIt<IngressinhosRemoteDatasource>(),
-    ),
+    () =>
+        EventsRepositoryImpl(remoteDatasource: getIt<EventsRemoteDatasource>()),
   );
 
   getIt.registerFactory(
-    () => EventsCubit(repository: getIt<EventsRepository>()),
+    () => EventsCubit(
+      eventRepository: getIt<EventsRepository>()
+    ),
   );
 }
