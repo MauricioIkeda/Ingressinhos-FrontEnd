@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:ingressinhos_frontend/core/data/datasource/ingressinhos_local_datasource.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
@@ -26,6 +25,11 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
         if (ticket.data['data'].isNotEmpty) {
           event.baseTicketPrice = ticket.data['data'][0]['basePrice'];
         }
+
+        if (event.locationId != null) {
+          final location = await _ingressinhosClient.dio.get(Endpoints.locations, queryParameters: {'id': event.locationId});
+          event.locationName = location.data['data'][0]['name'];
+        }
         events.add(event);
       }
 
@@ -36,38 +40,19 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
   }
 
   @override
-  Future<LocationModel> getLocationById(int id) async {
-    try {
-      final response = await _ingressinhosClient.dio.get(
-        '${Endpoints.locations}/$id',
-      );
-
-      LocationModel location = LocationModel.fromJson(response.data['data']);
-
-      IngressinhosLocalDatasource.locationCache[id] = location;
-      return location;
-    } on DioException catch (e) {
-      throw IngressinhosException(mapDioError(e, 'Erro ao buscar localização'));
-    }
+  Future<List<LocationModel>> getAllLocations() async {
+    final response = await _ingressinhosClient.dio.get(Endpoints.locations);
+    return (response.data['data'] as List)
+        .map((json) => LocationModel.fromJson(json))
+        .toList();
   }
 
   @override
-  Future<List<LocationModel>> getAllLocations() async {
+  Future<void> createEvent(EventModel eventModel) async {
     try {
-      final response = await _ingressinhosClient.dio.get(Endpoints.locations);
-      List<LocationModel> locations = (response.data['data'] as List)
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-
-      IngressinhosLocalDatasource.locationCache.clear();
-
-      for (final location in locations) {
-        IngressinhosLocalDatasource.locationCache[location.id] = location;
-      }
-
-      return locations;
+      await _ingressinhosClient.dio.post(Endpoints.eventos, data: eventModel.toJson());
     } on DioException catch (e) {
-      throw IngressinhosException(mapDioError(e, 'Erro ao buscar localizações'));
+      throw IngressinhosException(mapDioError(e, 'Erro ao criar evento'));
     }
   }
 }

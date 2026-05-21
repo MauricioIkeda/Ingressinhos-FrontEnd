@@ -3,6 +3,7 @@ import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 
 abstract class EventsRemoteDatasource{
   Future<List<EventModel>> getEvents();
-  Future<LocationModel> getLocationById(int id);
   Future<List<LocationModel>> getAllLocations();
+  
+  Future<void> createEvent(EventModel eventModel);
 }

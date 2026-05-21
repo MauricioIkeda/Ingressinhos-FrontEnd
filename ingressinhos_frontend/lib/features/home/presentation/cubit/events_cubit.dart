@@ -27,7 +27,14 @@ class EventsCubit extends Cubit<EventsState> {
   Future<void> createEvent(EventModel event) async{
     emit (const EventCreating());
 
-    // Terminar de fazer, pq agora irei jogar gachaa
+    try {
+      await _eventRepository.createEvent(event);
+      await loadEvents();
+    } on IngressinhosException catch (e) {
+      emit(EventsError(e.message));
+    } catch (e) {
+      emit(EventsError(e.toString().replaceFirst('Exception: ', '')));
+    }
   }
 
   Future<List<LocationModel>> loadLocations() async {

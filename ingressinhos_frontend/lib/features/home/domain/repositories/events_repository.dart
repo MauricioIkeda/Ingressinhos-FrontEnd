@@ -4,5 +4,6 @@ import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 abstract class EventsRepository {
   Future<List<EventModel>> getEvents();
   Future<List<LocationModel>> getAllLocations();
-  Future<LocationModel> getLocationWithId(int id);
+
+  Future<void> createEvent(EventModel eventModel);
 }

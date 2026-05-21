@@ -99,9 +99,7 @@ class _EventCard extends StatelessWidget {
     final imageUrl = event.imageUrl;
     final startTime = _formatDate(event.startTime.toIso8601String());
     final hasSeats = event.hasSeats;
-    final locationLabel = (event.location?.name.trim().isNotEmpty == true)
-        ? event.location!.name
-        : 'Desconhecido';
+    final locationLabel = event.locationName ?? 'Desconhecida';
     final ticketPrice = event.baseTicketPrice;
 
     final cardBackground = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
