@@ -48,7 +48,7 @@ class EventModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'sellerId': sellerId,
+      'sellerId': int.tryParse(sellerId.toString()) ?? 0,
       'name': name,
       'startTime': startTime.toUtc().toIso8601String(), 
       'endTime': endTime.toUtc().toIso8601String(),

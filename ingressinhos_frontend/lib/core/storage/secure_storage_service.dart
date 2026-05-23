@@ -33,21 +33,22 @@ class SecureStorageService {
     return json.decode(decoded) as Map<String, dynamic>;
   }
 
-  Future<UserModel?> getUserFromToken() async {
+  Future<UserModel> getUserFromToken() async {
     final token = await getToken();
-    if (token == null) return null;
+    if (token == null) throw Exception('Token não encontrado');
 
     try {
       final payload = _parseJwtPayload(token);
 
+      final sellerId = payload['sellerId'] as int?;
       final name = payload['unique_name'] as String?;
       final role = payload['role'] as String?;
 
-      if (name == null || role == null) return null;
+      if (name == null || role == null) throw Exception('Dados do usuário inválidos');
 
-      return UserModel(name: name, role: role);
+      return UserModel(name: name, role: role, sellerId: sellerId);
     } catch (_) {
-      return null;
+      throw Exception('Erro ao processar token');
     }
   }
 

@@ -47,12 +47,14 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
         .toList();
   }
 
-  @override
+@override
   Future<void> createEvent(EventModel eventModel) async {
     try {
       await _ingressinhosClient.dio.post(Endpoints.eventos, data: eventModel.toJson());
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao criar evento'));
+    } catch (e) {
+      throw IngressinhosException('Erro interno ao tentar criar o evento');
     }
   }
 }

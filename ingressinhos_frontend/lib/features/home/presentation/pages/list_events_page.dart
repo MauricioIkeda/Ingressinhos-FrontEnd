@@ -5,6 +5,7 @@ import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_state.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/event_details_page.dart';
 
 class ListEventPage extends StatefulWidget {
   const ListEventPage({super.key});
@@ -104,17 +105,20 @@ class _EventCard extends StatelessWidget {
 
     final cardBackground = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700;
+    final secondaryTextColor = isDarkMode
+        ? Colors.grey.shade400
+        : Colors.grey.shade700;
 
     return GestureDetector(
       onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => EventDetailsPage(event: event)),
+        );
       },
       child: Card(
         elevation: 12,
-        shadowColor: Colors.black.withOpacity(0.4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        shadowColor: Colors.black.withValues(alpha: 0.4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         clipBehavior: Clip.antiAlias,
         color: cardBackground,
         child: Column(
@@ -134,7 +138,7 @@ class _EventCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.78),
+                          Colors.black.withValues(alpha: 0.78),
                         ],
                       ),
                     ),
@@ -169,7 +173,9 @@ class _EventCard extends StatelessWidget {
                         fontSize: 17.5,
                         fontWeight: FontWeight.w700,
                         height: 1.15,
-                        color: isDarkMode ? Colors.white : AppColors.primaryColor,
+                        color: isDarkMode
+                            ? Colors.white
+                            : AppColors.primaryColor,
                       ),
                     ),
 
@@ -194,7 +200,7 @@ class _EventCard extends StatelessWidget {
                           colors: [
                             Colors.white,
                             Colors.white,
-                            Colors.white.withOpacity(0.0),
+                            Colors.white.withValues(alpha: 0.0),
                           ],
                           stops: const [0.0, 0.75, 1.0],
                         ).createShader(bounds),
@@ -300,7 +306,10 @@ class _EventImage extends StatelessWidget {
       return Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryColor, AppColors.primaryColor.withOpacity(0.7)],
+            colors: [
+              AppColors.primaryColor,
+              AppColors.primaryColor.withValues(alpha: 0.7),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -346,7 +355,7 @@ class _Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: backgroundColor.withOpacity(0.5),
+            color: backgroundColor.withValues(alpha: 0.5),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

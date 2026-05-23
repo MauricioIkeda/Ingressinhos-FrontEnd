@@ -38,6 +38,9 @@ class EventsRepositoryImpl implements EventsRepository {
   @override
   Future<void> createEvent(EventModel eventModel) async {
     try {
+      UserModel user = await storage.getUserFromToken();
+      eventModel.sellerId = user.sellerId;
+
       await remoteDatasource.createEvent(eventModel);
     } on Exception catch (e) {
       throw Exception('Erro ao criar evento: ${e.toString()}');
