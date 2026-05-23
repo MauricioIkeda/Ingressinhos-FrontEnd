@@ -30,6 +30,7 @@ class EventsCubit extends Cubit<EventsState> {
     try {
       await _eventRepository.createEvent(event);
       await loadEvents();
+      emit(const EventsCreated());
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));
     } catch (e) {

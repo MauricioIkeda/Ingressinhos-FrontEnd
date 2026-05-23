@@ -39,7 +39,6 @@ class EventsRepositoryImpl implements EventsRepository {
   Future<void> createEvent(EventModel eventModel) async {
     try {
       UserModel user = await storage.getUserFromToken();
-      eventModel.sellerId = user.sellerId;
 
       await remoteDatasource.createEvent(eventModel);
     } on Exception catch (e) {

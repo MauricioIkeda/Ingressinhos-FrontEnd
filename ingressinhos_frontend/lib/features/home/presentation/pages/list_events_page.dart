@@ -19,7 +19,6 @@ class _ListEventPageState extends State<ListEventPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EventsCubit>().loadEvents();
-      //context.read<EventsCubit>().loadTickets();
     });
   }
 

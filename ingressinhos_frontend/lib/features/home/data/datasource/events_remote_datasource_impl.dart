@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
+import 'package:ingressinhos_frontend/core/data/models/ticket_model.dart';
 import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
 import 'package:ingressinhos_frontend/core/network/endpoints.dart';
 import 'package:ingressinhos_frontend/features/home/data/datasource/events_remote_datasource.dart';
@@ -15,25 +16,17 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
   @override
   Future<List<EventModel>> getEvents() async {
     try {
-      final response = await _ingressinhosClient.dio.get(Endpoints.eventos, queryParameters: {r'$top': 10});
-
-      List<EventModel> events = [];
-
-      for (var item in response.data['data']) {
-        EventModel event = EventModel.fromJson(item);
-        final ticket = await _ingressinhosClient.dio.get(Endpoints.tickets, queryParameters: {'eventId': event.id, r'$top': 1});
-        if (ticket.data['data'].isNotEmpty) {
-          event.baseTicketPrice = ticket.data['data'][0]['basePrice'];
+      final response = await _ingressinhosClient.dio.get(
+        Endpoints.eventsWithTickets, queryParameters: {
+          'top': '4',
         }
+      );
 
-        if (event.locationId != null) {
-          final location = await _ingressinhosClient.dio.get(Endpoints.locations, queryParameters: {'id': event.locationId});
-          event.locationName = location.data['data'][0]['name'];
-        }
-        events.add(event);
-      }
-
-      return events;
+      final data = response.data['data'] as List? ?? [];
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(EventModel.fromJson)
+          .toList();
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao buscar eventos'));
     }
@@ -50,11 +43,26 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
 @override
   Future<void> createEvent(EventModel eventModel) async {
     try {
-      await _ingressinhosClient.dio.post(Endpoints.eventos, data: eventModel.toJson());
+      final response = await _ingressinhosClient.dio.post(Endpoints.eventos, data: eventModel.toJson());
+
+      TicketModel ticket = TicketModel(
+        eventId: response.data['eventId'].toInt(),
+        ticketId: 0,
+        name: '${eventModel.name} - Ingresso',
+        basePrice: eventModel.baseTicketPrice!,
+        premiumPrice: eventModel.premiumTicketPrice ?? 0,
+        vipPrice: eventModel.vipTicketPrice ?? 0,
+        salesStartsAt: eventModel.salesStartsAt!,
+        salesEndsAt: eventModel.salesEndsAt!,
+        isActive: eventModel.isActive ?? true,
+      );
+
+      await _ingressinhosClient.dio.post(Endpoints.tickets, data: ticket.toJson());
+
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao criar evento'));
     } catch (e) {
-      throw IngressinhosException('Erro interno ao tentar criar o evento');
+      throw IngressinhosException('Erro do front burro cansado por algum motivo: ${e.toString()}');
     }
   }
 }

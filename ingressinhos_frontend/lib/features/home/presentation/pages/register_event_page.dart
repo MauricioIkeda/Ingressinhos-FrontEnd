@@ -4,8 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_state.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/widgets/event_card.dart';
 
 class RegisterEventPage extends StatefulWidget {
@@ -21,9 +23,14 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final imageUrlController = TextEditingController();
+  final baseTicketPriceController = TextEditingController();
+  final premiumTicketPriceController = TextEditingController();
+  final vipTicketPriceController = TextEditingController();
 
   DateTime? startDate;
   DateTime? endDate;
+  DateTime? salesStartsAt;
+  DateTime? salesEndsAt;
   int? selectedLocationId;
   bool hasSeats = true;
 
@@ -43,6 +50,9 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     nameController.dispose();
     descriptionController.dispose();
     imageUrlController.dispose();
+    baseTicketPriceController.dispose();
+    premiumTicketPriceController.dispose();
+    vipTicketPriceController.dispose();
     super.dispose();
   }
 
@@ -59,7 +69,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: DateTime(2100),
     );
     if (date == null) return;
 
@@ -86,6 +96,38 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     });
   }
 
+    Future<void> _selectDateTimeSales(bool isStart) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+    if (date == null) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (time == null) return;
+
+    final dateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+
+    setState(() {
+      if (isStart) {
+        salesStartsAt = dateTime;
+      } else {
+        salesEndsAt = dateTime;
+      }
+    });
+  }
+
   void _submit() {
     if (_formKey.currentState!.validate() &&
         startDate != null &&
@@ -103,6 +145,13 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
         imageUrl: imageUrlController.text.trim().isEmpty
             ? null
             : imageUrlController.text.trim(),
+        baseTicketPrice: double.tryParse(baseTicketPriceController.text.trim()),
+        premiumTicketPrice: double.tryParse(
+          premiumTicketPriceController.text.trim(),
+        ),
+        vipTicketPrice: double.tryParse(vipTicketPriceController.text.trim()),
+        salesStartsAt: salesStartsAt,
+        salesEndsAt: salesEndsAt,
       );
 
       context.read<EventsCubit>().createEvent(event);
@@ -129,7 +178,15 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
           ? description
           : 'Adicione uma descrição para deixar o evento mais atrativo.',
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
-      baseTicketPrice: null,
+      baseTicketPrice: baseTicketPriceController.text.trim().isNotEmpty
+          ? double.tryParse(baseTicketPriceController.text.trim())
+          : null,
+      premiumTicketPrice: premiumTicketPriceController.text.trim().isNotEmpty
+          ? double.tryParse(premiumTicketPriceController.text.trim())
+          : null,
+      vipTicketPrice: vipTicketPriceController.text.trim().isNotEmpty
+          ? double.tryParse(vipTicketPriceController.text.trim())
+          : null,
     );
   }
 
@@ -149,110 +206,63 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       appBar: const IngressinhosAppBar(),
       drawer: const IngressinhosDrawer(),
       backgroundColor: AppColors.backgroundColor,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWideLayout = constraints.maxWidth >= 960;
-          final previewEvent = _buildPreviewEvent();
+      body: BlocListener<EventsCubit, EventsState>(
+        listener: (context, state) {
+          if (state is EventsCreated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Evento criado com sucesso!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pushReplacementNamed(context, '/home');
+          }
 
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isWideLayout ? 1100 : 650,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 24),
-                    if (isWideLayout)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: _buildFormCard()),
-                          const SizedBox(width: 24),
-                          Flexible(child: _buildPreviewCard(previewEvent)),
-                        ],
-                      )
-                    else
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFormCard(),
-                          const SizedBox(height: 24),
-                          _buildPreviewCard(previewEvent),
-                        ],
-                      ),
-                  ],
+          if (state is EventsError) {
+            showErrorSnackBar(context, state.message, true);
+          }
+        },
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWideLayout = constraints.maxWidth >= 960;
+            final previewEvent = _buildPreviewEvent();
+
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isWideLayout ? 1100 : 650,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isWideLayout)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildFormCard()),
+                            const SizedBox(width: 24),
+                            Flexible(child: _buildPreviewCard(previewEvent)),
+                          ],
+                        )
+                      else
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildPreviewCard(previewEvent),
+                            const SizedBox(height: 24),
+                            _buildFormCard(),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primaryColor, AppColors.accentSecondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+            );
+          },
         ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryColor.withValues(alpha: 0.4),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 56,
-            width: 56,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.event_available_rounded,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Cadastrar Evento',
-                  style: GoogleFonts.poppins(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Preencha os detalhes e veja o preview do card em tempo real.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14.5,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -291,6 +301,43 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
                 label: 'Data e Hora de Término',
                 selectedDate: endDate,
                 onTap: () => _selectDateTime(false),
+                icon: Icons.schedule_rounded,
+              ),
+              const SizedBox(height: 22),
+              _buildSectionTitle('Valores dos ingressos'),
+              const SizedBox(height: 12),
+              _buildTextField(
+                'Preço do Ingresso Base',
+                baseTicketPriceController,
+                icon: Icons.confirmation_num_rounded,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                'Preço do Ingresso Premium',
+                premiumTicketPriceController,
+                icon: Icons.confirmation_num_rounded,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                'Preço do Ingresso VIP',
+                vipTicketPriceController,
+                icon: Icons.confirmation_num_rounded,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 16),
+              _buildDateTimeField(
+                label: 'Data de Início das Vendas',
+                selectedDate: salesStartsAt,
+                onTap: () => _selectDateTimeSales(true),
+                icon: Icons.schedule_rounded,
+              ),
+              const SizedBox(height: 16),
+              _buildDateTimeField(
+                label: 'Data de Término das Vendas',
+                selectedDate: salesEndsAt,
+                onTap: () => _selectDateTimeSales(false),
                 icon: Icons.schedule_rounded,
               ),
               const SizedBox(height: 22),
@@ -356,19 +403,20 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
         final totalSpacing = crossSpacing * (crossAxisCount - 1);
         final gridItemWidth =
             (screenWidth - horizontalPadding - totalSpacing) / crossAxisCount;
-        final previewWidth =
-            gridItemWidth.clamp(0.0, constraints.maxWidth) as double;
+        final previewWidth = gridItemWidth.clamp(0.0, constraints.maxWidth);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Preview do card'),
+            Center(child: _buildSectionTitle('Preview do card')),
             const SizedBox(height: 6),
-            Text(
-              'Veja como o evento aparece na listagem.',
-              style: GoogleFonts.poppins(
-                fontSize: 13.5,
-                color: AppColors.secondaryText,
+            Center(
+              child: Text(
+                'Veja como o evento aparece na listagem.',
+                style: GoogleFonts.poppins(
+                  fontSize: 13.5,
+                  color: AppColors.secondaryText,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -388,10 +436,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
   Widget _buildLocationField() {
     if (isLoadingLocations) {
       return InputDecorator(
-        decoration: _inputDecoration(
-          'Localização',
-          icon: Icons.place_rounded,
-        ),
+        decoration: _inputDecoration('Localização', icon: Icons.place_rounded),
         child: Row(
           children: [
             const SizedBox(
@@ -412,19 +457,10 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     return DropdownButtonFormField<int>(
       value: selectedLocationId,
       isExpanded: true,
-      decoration: _inputDecoration(
-        'Localização',
-        icon: Icons.place_rounded,
-      ),
-      icon: const Icon(
-        Icons.arrow_drop_down,
-        color: AppColors.primaryColor,
-      ),
+      decoration: _inputDecoration('Localização', icon: Icons.place_rounded),
+      icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
       dropdownColor: AppColors.surfaceColor,
-      style: GoogleFonts.poppins(
-        color: AppColors.primaryText,
-        fontSize: 16,
-      ),
+      style: GoogleFonts.poppins(color: AppColors.primaryText, fontSize: 16),
       items: locations.map((loc) {
         return DropdownMenuItem<int>(
           value: loc.id,
@@ -475,12 +511,14 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
   }
 
   Widget _buildSectionTitle(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.poppins(
-        fontSize: 16.5,
-        fontWeight: FontWeight.w600,
-        color: AppColors.primaryText,
+    return Center(
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 16.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primaryText,
+        ),
       ),
     );
   }
@@ -500,10 +538,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(
-          color: AppColors.primaryFocus,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: AppColors.primaryFocus, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
@@ -522,9 +557,10 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       maxLines: maxLines,
       onChanged: onChanged,
       style: GoogleFonts.poppins(color: AppColors.primaryText),
-      decoration: _inputDecoration(label, icon: icon).copyWith(
-        alignLabelWithHint: maxLines > 1,
-      ),
+      decoration: _inputDecoration(
+        label,
+        icon: icon,
+      ).copyWith(alignLabelWithHint: maxLines > 1),
       validator: isRequired
           ? (value) =>
                 value?.trim().isEmpty == true ? '$label obrigatório' : null

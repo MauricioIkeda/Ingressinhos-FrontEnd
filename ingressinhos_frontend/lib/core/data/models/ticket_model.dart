@@ -1,6 +1,5 @@
 class TicketModel {
   final int ticketId;
-  final int sellerId;
   final int eventId;
   final String name;
   final double basePrice;
@@ -12,7 +11,6 @@ class TicketModel {
 
   TicketModel({
     required this.ticketId,
-    required this.sellerId,
     required this.eventId,
     required this.name,
     required this.basePrice,
@@ -26,7 +24,6 @@ class TicketModel {
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     return TicketModel(
       ticketId: json['ticketId'],
-      sellerId: json['sellerId'],
       eventId: json['eventId'],
       name: json['name'],
       basePrice: json['basePrice'].toDouble(),
@@ -36,5 +33,19 @@ class TicketModel {
       salesEndsAt: DateTime.parse(json['salesEndsAt']),
       isActive: json['isActive'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ticketId': ticketId,
+      'eventId': eventId,
+      'name': name,
+      'basePrice': basePrice,
+      'premiumPrice': premiumPrice,
+      'vipPrice': vipPrice,
+      'salesStartsAt': salesStartsAt.toUtc().toIso8601String(),
+      'salesEndsAt': salesEndsAt.toUtc().toIso8601String(),
+      'isActive': isActive,
+    };
   }
 }

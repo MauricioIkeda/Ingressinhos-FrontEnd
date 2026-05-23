@@ -28,6 +28,7 @@ class EventCard extends StatelessWidget {
     final imageUrl = event.imageUrl;
     final startTime = _formatDate(event.startTime);
     final hasSeats = event.hasSeats;
+    final availableTickets = event.availableTickets ?? 0;
     final locationLabel = (event.locationName?.trim().isNotEmpty == true)
         ? event.locationName!.trim()
         : 'Local a definir';
@@ -94,8 +95,8 @@ class EventCard extends StatelessWidget {
                         top: 12,
                         left: 12,
                         child: _Badge(
-                          text: hasSeats ? 'COM VAGAS' : 'LOTADO',
-                          backgroundColor: hasSeats
+                          text: availableTickets > 0 ? 'COM VAGAS' : 'LOTADO',
+                          backgroundColor: availableTickets > 0
                               ? const Color(0xFF22C55E)
                               : const Color(0xFFEF4444),
                         ),
@@ -239,10 +240,11 @@ class EventCard extends StatelessWidget {
     final localDate = date.toLocal();
     final day = localDate.day.toString().padLeft(2, '0');
     final month = localDate.month.toString().padLeft(2, '0');
+    final year = localDate.year.toString();
     final hour = localDate.hour.toString().padLeft(2, '0');
     final minute = localDate.minute.toString().padLeft(2, '0');
 
-    return '$day/$month • $hour:$minute';
+    return '$day/$month/$year • $hour:$minute';
   }
 }
 
