@@ -1,5 +1,3 @@
-import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
-
 class EventModel {
   int? id;
   int? sellerId;
