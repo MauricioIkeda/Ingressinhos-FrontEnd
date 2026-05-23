@@ -13,9 +13,17 @@ class EventsRepositoryImpl implements EventsRepository {
   EventsRepositoryImpl({required this.remoteDatasource});
 
   @override
-  Future<List<EventModel>> getEvents() async {
+  Future<List<EventModel>> getEvents({
+    int skip = 0,
+    int top = 4,
+    String orderBy = 'startTime asc',
+  }) async {
     try {
-      List<EventModel> eventsData = await remoteDatasource.getEvents();
+      List<EventModel> eventsData = await remoteDatasource.getEvents(
+        skip: skip,
+        top: top,
+        orderBy: orderBy,
+      );
 
       return eventsData;
     } on Exception catch (e) {

@@ -14,12 +14,19 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
   EventsRemoteDatasourceImpl(this._ingressinhosClient);
 
   @override
-  Future<List<EventModel>> getEvents() async {
+  Future<List<EventModel>> getEvents({
+    int skip = 0,
+    int top = 4,
+    String orderBy = 'startTime asc',
+  }) async {
     try {
       final response = await _ingressinhosClient.dio.get(
-        Endpoints.eventsWithTickets, queryParameters: {
-          'top': '4',
-        }
+        Endpoints.eventsWithTickets,
+        queryParameters: {
+          r'$top': top,
+          r'$skip': skip,
+          r'$orderby': orderBy,
+        },
       );
 
       final data = response.data['data'] as List? ?? [];

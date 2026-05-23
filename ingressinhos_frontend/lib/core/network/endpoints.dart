@@ -11,8 +11,8 @@ class Endpoints {
   }
 
   // API Auth
-  static String get ingressinhosBaseUrl => 'http://$baseHost:5202';
-  static String get authBaseUrl => 'http://$baseHost:5254';
+  static String get ingressinhosBaseUrl => 'https://example.invalid'; // verdadeiro http://$baseHost:5202
+  static String get authBaseUrl => 'https://example.invalid'; // verdadeiro http://$baseHost:5254
 
   static const authClientRegister = '/api/clients'; // Para cadastrar usuarios
   static const authSellerRegister = '/api/sellers'; // Para cadastrar vendedores

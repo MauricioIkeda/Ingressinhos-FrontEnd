@@ -14,8 +14,14 @@ class EventsLoading extends EventsState {
 
 class EventsLoaded extends EventsState {
   final List<EventModel> events;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  const EventsLoaded(this.events);
+  const EventsLoaded(
+    this.events, {
+    this.hasMore = true,
+    this.isLoadingMore = false,
+  });
 }
 
 class EventsError extends EventsState {
