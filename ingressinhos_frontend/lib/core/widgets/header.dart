@@ -43,81 +43,84 @@ class IngressinhosDrawer extends StatelessWidget {
 
     return Drawer(
       backgroundColor: AppColors.backgroundColor,
-      child: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<UserModel?>(
-              future: storage.getUserFromToken(),
-              builder: (context, snapshot) {
-                final user = snapshot.data;
-                final isSeller = user?.role == 'Seller';
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<UserModel?>(
+                future: storage.getUserFromToken(),
+                builder: (context, snapshot) {
+                  final user = snapshot.data;
+                  final isSeller = user?.role == 'Seller';
 
-                return ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    DrawerHeader(
-                      decoration: BoxDecoration(
-                        color: AppColors.appBarBackgroundColor,
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const CircleAvatar(
-                              radius: 32,
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                Icons.person,
-                                size: 40,
-                                color: AppColors.primaryColor,
+                  return ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      DrawerHeader(
+                        decoration: BoxDecoration(
+                          color: AppColors.appBarBackgroundColor,
+                        ),
+                        child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircleAvatar(
+                                radius: 32,
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: AppColors.primaryColor,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            _buildUserInfo(snapshot, user),
-                          ],
+                              const SizedBox(width: 16),
+                              _buildUserInfo(snapshot, user),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
 
-                    _buildMenuItem(
-                      Icons.home,
-                      'Home',
-                      () {
-                        Navigator.pop(context);
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                    ),
-                    _buildMenuItem(
-                      Icons.confirmation_num_sharp,
-                      'Meus Ingressos',
-                      () => Navigator.pop(context),
-                    ),
-
-                    if (isSeller)
                       _buildMenuItem(
-                        Icons.add_circle_outline,
-                        'Cadastrar Evento',
+                        Icons.home,
+                        'Home',
                         () {
                           Navigator.pop(context);
-                          Navigator.pushNamed(context, '/registerevent');
+                          Navigator.pushReplacementNamed(context, '/home');
                         },
                       ),
+                      _buildMenuItem(
+                        Icons.confirmation_num_sharp,
+                        'Meus Ingressos',
+                        () => Navigator.pop(context),
+                      ),
 
-                    _buildMenuItem(
-                      Icons.settings,
-                      'Configurações',
-                      () => Navigator.pop(context),
-                    ),
-                  ],
-                );
-              },
+                      if (isSeller)
+                        _buildMenuItem(
+                          Icons.add_circle_outline,
+                          'Cadastrar Evento',
+                          () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, '/registerevent');
+                          },
+                        ),
+
+                      _buildMenuItem(
+                        Icons.settings,
+                        'Configurações',
+                        () => Navigator.pop(context),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
 
-          const Divider(color: Colors.grey, height: 1),
-          _buildMenuItem(Icons.exit_to_app, 'Deslogar', () => onLogout?.call()),
-          const SizedBox(height: 8),
-        ],
+            const Divider(color: Colors.grey, height: 1),
+            _buildMenuItem(Icons.exit_to_app, 'Deslogar', () => onLogout?.call()),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

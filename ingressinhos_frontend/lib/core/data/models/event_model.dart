@@ -11,6 +11,7 @@ class EventModel {
   final String? description;
   final String? imageUrl;
 
+  String? sellerTradingName;
   double? baseTicketPrice;
   double? premiumTicketPrice;
   double? vipTicketPrice;
@@ -31,6 +32,7 @@ class EventModel {
     required this.hasSeats,
     this.description,
     this.imageUrl,
+    this.sellerTradingName,
     this.baseTicketPrice,
     this.premiumTicketPrice,
     this.vipTicketPrice,
@@ -41,11 +43,6 @@ class EventModel {
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
-    double? parseDouble(dynamic value) {
-      if (value == null) return null;
-      return double.tryParse(value.toString());
-    }
-
     int? parseInt(dynamic value) {
       if (value == null) return null;
       if (value is int) return value;
@@ -69,6 +66,7 @@ class EventModel {
       hasSeats: json['hasSeats'] == true,
       description: json['description']?.toString(),
       imageUrl: json['imageUrl']?.toString(),
+      sellerTradingName: json['sellerTradingName']?.toString(),
       baseTicketPrice: json['basePrice'],
       premiumTicketPrice: json['premiumPrice'],
       vipTicketPrice: json['vipPrice'],

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
@@ -155,6 +156,8 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       );
 
       context.read<EventsCubit>().createEvent(event);
+    }else{
+      showErrorSnackBar(context, 'Preencha todos os campos obrigatórios', true);
     }
   }
 
@@ -202,7 +205,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return IngressinhosScaffold(
       appBar: const IngressinhosAppBar(),
       drawer: const IngressinhosDrawer(),
       backgroundColor: AppColors.backgroundColor,
@@ -283,7 +286,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
               _buildSectionTitle('Informações principais'),
               const SizedBox(height: 12),
               _buildTextField(
-                'Nome do Evento',
+                'Nome do Evento (obrigatório)',
                 nameController,
                 icon: Icons.title_rounded,
                 isRequired: true,
@@ -291,14 +294,14 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
               ),
               const SizedBox(height: 16),
               _buildDateTimeField(
-                label: 'Data e Hora de Início',
+                label: 'Data e Hora de Início (obrigatório)',
                 selectedDate: startDate,
                 onTap: () => _selectDateTime(true),
                 icon: Icons.calendar_month_rounded,
               ),
               const SizedBox(height: 16),
               _buildDateTimeField(
-                label: 'Data e Hora de Término',
+                label: 'Data e Hora de Término (obrigatório)',
                 selectedDate: endDate,
                 onTap: () => _selectDateTime(false),
                 icon: Icons.schedule_rounded,
@@ -328,14 +331,14 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
               ),
               const SizedBox(height: 16),
               _buildDateTimeField(
-                label: 'Data de Início das Vendas',
+                label: 'Data de Início das Vendas (obrigatório)',
                 selectedDate: salesStartsAt,
                 onTap: () => _selectDateTimeSales(true),
                 icon: Icons.schedule_rounded,
               ),
               const SizedBox(height: 16),
               _buildDateTimeField(
-                label: 'Data de Término das Vendas',
+                label: 'Data de Término das Vendas (obrigatório)',
                 selectedDate: salesEndsAt,
                 onTap: () => _selectDateTimeSales(false),
                 icon: Icons.schedule_rounded,
@@ -457,7 +460,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     return DropdownButtonFormField<int>(
       value: selectedLocationId,
       isExpanded: true,
-      decoration: _inputDecoration('Localização', icon: Icons.place_rounded),
+      decoration: _inputDecoration('Localização (obrigatório)', icon: Icons.place_rounded),
       icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
       dropdownColor: AppColors.surfaceColor,
       style: GoogleFonts.poppins(color: AppColors.primaryText, fontSize: 16),

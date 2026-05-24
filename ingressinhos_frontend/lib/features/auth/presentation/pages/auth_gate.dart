@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_page.dart';
@@ -15,7 +16,7 @@ class AuthGate extends StatelessWidget {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
         if (state is AuthInitial) {
-          return Scaffold(
+          return IngressinhosScaffold(
             backgroundColor: AppColors.appBarBackgroundColor,
             body: Center(
               child: Column(
@@ -49,7 +50,9 @@ class AuthGate extends StatelessWidget {
           return const LoginPage();
         }
 
-        return const Scaffold(body: Center(child: Text('Estado desconhecido')));
+        return const IngressinhosScaffold(
+          body: Center(child: Text('Estado desconhecido')),
+        );
       },
     );
   }

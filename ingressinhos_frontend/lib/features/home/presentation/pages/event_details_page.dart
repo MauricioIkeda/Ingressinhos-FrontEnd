@@ -2,15 +2,109 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 
-class EventDetailsPage extends StatelessWidget {
+class EventDetailsPage extends StatefulWidget {
   final EventModel event;
 
   const EventDetailsPage({super.key, required this.event});
 
   @override
+  State<EventDetailsPage> createState() => _EventDetailsPageState();
+}
+
+class _EventDetailsPageState extends State<EventDetailsPage> {
+  int _baseQuantity = 0;
+  int _premiumQuantity = 0;
+  int _vipQuantity = 0;
+
+  int get _totalTickets => _baseQuantity + _premiumQuantity + _vipQuantity;
+
+  double get _totalPrice {
+    final event = widget.event;
+    return (_baseQuantity * (event.baseTicketPrice ?? 0)) +
+        (_premiumQuantity * (event.premiumTicketPrice ?? 0)) +
+        (_vipQuantity * (event.vipTicketPrice ?? 0));
+  }
+
+  String _formatCurrency(double value) {
+    final formatted = value.toStringAsFixed(2).replaceAll('.', ',');
+    return 'R\$ $formatted';
+  }
+
+  void _incrementQuantity(TicketType type) {
+    setState(() {
+      switch (type) {
+        case TicketType.base:
+          _baseQuantity++;
+          break;
+        case TicketType.premium:
+          _premiumQuantity++;
+          break;
+        case TicketType.vip:
+          _vipQuantity++;
+          break;
+      }
+    });
+  }
+
+  void _decrementQuantity(TicketType type) {
+    setState(() {
+      switch (type) {
+        case TicketType.base:
+          if (_baseQuantity > 0) _baseQuantity--;
+          break;
+        case TicketType.premium:
+          if (_premiumQuantity > 0) _premiumQuantity--;
+          break;
+        case TicketType.vip:
+          if (_vipQuantity > 0) _vipQuantity--;
+          break;
+      }
+    });
+  }
+
+  void _onBuyPressed() {
+    if (_totalTickets <= 0) return;
+
+    final summary = <String>[];
+    if (_baseQuantity > 0) summary.add('Base: $_baseQuantity');
+    if (_premiumQuantity > 0) summary.add('Premium: $_premiumQuantity');
+    if (_vipQuantity > 0) summary.add('VIP: $_vipQuantity');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Compra iniciada (${summary.join(' • ')}) • Total: ${_formatCurrency(_totalPrice)}',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
+  }
+
+  void _onAddToCart() {
+    if (_totalTickets <= 0) return;
+
+    final summary = <String>[];
+    if (_baseQuantity > 0) summary.add('Base: $_baseQuantity');
+    if (_premiumQuantity > 0) summary.add('Premium: $_premiumQuantity');
+    if (_vipQuantity > 0) summary.add('VIP: $_vipQuantity');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Compra iniciada (${summary.join(' • ')}) • Total: ${_formatCurrency(_totalPrice)}',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final event = widget.event;
+    final availableTickets = event.availableTickets ?? 0;
+    final hasAvailableTickets = availableTickets > 0;
     final title = event.name.trim().isNotEmpty ? event.name : 'Evento sem nome';
     final description = (event.description?.trim().isNotEmpty == true)
         ? event.description!
@@ -20,11 +114,14 @@ class EventDetailsPage extends StatelessWidget {
         : 'Local não informado';
     final startText = _formatDateTime(event.startTime);
     final endText = _formatDateTime(event.endTime);
-    final priceText = event.baseTicketPrice != null
-        ? 'R\$ ${event.baseTicketPrice!.toStringAsFixed(2)}'
-        : 'Valor não informado';
+    final sellerName = (event.sellerTradingName?.trim().isNotEmpty == true)
+        ? event.sellerTradingName!.trim()
+        : 'Vendedor desconhecido';
+    final availableTicketsText = event.availableTickets != null
+        ? '${event.availableTickets} ingresso(s) disponíveis'
+        : 'Quantidade de ingressos disponível não informada';
 
-    return Scaffold(
+    return IngressinhosScaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         elevation: 1,
@@ -130,15 +227,21 @@ class EventDetailsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _InfoTile(
-                    icon: Icons.confirmation_number_rounded,
-                    label: 'Preço base',
-                    value: priceText,
-                  ),
-                  const SizedBox(height: 12),
-                  _InfoTile(
                     icon: Icons.event_seat_rounded,
                     label: 'Assentos',
                     value: event.hasSeats ? 'Disponível' : 'Indisponível',
+                  ),
+                  const SizedBox(height: 12),
+                  _InfoTile(
+                    icon: Icons.confirmation_num_rounded,
+                    label: 'Ingressos disponíveis',
+                    value: availableTicketsText,
+                  ),
+                  const SizedBox(height: 12),
+                  _InfoTile(
+                    icon: Icons.storefront_rounded,
+                    label: 'Vendedor',
+                    value: sellerName,
                   ),
                 ],
               ),
@@ -151,15 +254,96 @@ class EventDetailsPage extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14.5,
                   height: 1.65,
-                  color: isDarkMode ? AppColors.primaryText : AppColors.primaryText,
+                  color: AppColors.primaryText,
                 ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            _InfoCard(
+              title: 'Ingressos',
+              child: Column(
+                children: [
+                  _TicketTypeSelector(
+                    label: 'Base',
+                    price:
+                        event.baseTicketPrice == 0.0 ||
+                            event.baseTicketPrice == null
+                        ? 'Gratis'
+                        : _formatCurrency(event.baseTicketPrice!),
+                    quantity: _baseQuantity,
+                    canIncrement:
+                        hasAvailableTickets && _totalTickets < availableTickets,
+                    onIncrement: () => _incrementQuantity(TicketType.base),
+                    onDecrement: () => _decrementQuantity(TicketType.base),
+                  ),
+                  if (event.premiumTicketPrice != null &&
+                      event.premiumTicketPrice! > 0.0) ...[
+                    const SizedBox(height: 12),
+                    _TicketTypeSelector(
+                      label: 'Premium',
+                      price: _formatCurrency(event.premiumTicketPrice!),
+                      quantity: _premiumQuantity,
+                      canIncrement:
+                          hasAvailableTickets &&
+                          _totalTickets < availableTickets,
+                      onIncrement: () => _incrementQuantity(TicketType.premium),
+                      onDecrement: () => _decrementQuantity(TicketType.premium),
+                    ),
+                  ],
+                  if (event.vipTicketPrice != null &&
+                      event.vipTicketPrice! > 0.0) ...[
+                    const SizedBox(height: 12),
+                    _TicketTypeSelector(
+                      label: 'VIP',
+                      price: _formatCurrency(event.vipTicketPrice!),
+                      quantity: _vipQuantity,
+                      canIncrement:
+                          hasAvailableTickets &&
+                          _totalTickets < availableTickets,
+                      onIncrement: () => _incrementQuantity(TicketType.vip),
+                      onDecrement: () => _decrementQuantity(TicketType.vip),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: AppColors.primaryColor.withValues(alpha: 0.24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.shopping_bag_rounded,
+                    color: AppColors.primaryColor,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '$_totalTickets ingresso(s) • Total: ${_formatCurrency(_totalPrice)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 18),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: _totalTickets > 0 ? _onBuyPressed : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   foregroundColor: Colors.white,
@@ -169,7 +353,33 @@ class EventDetailsPage extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Voltar para a lista',
+                  _totalTickets > 0
+                      ? 'Comprar $_totalTickets ingresso(s)'
+                      : 'Selecione os ingressos',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _totalTickets > 0 ? _onAddToCart : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  _totalTickets > 0
+                      ? 'Adicionar $_totalTickets ingresso(s) ao carrinho'
+                      : 'Selecione os ingressos',
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -193,6 +403,8 @@ class EventDetailsPage extends StatelessWidget {
     return '$day/$month/$year • $hour:$minute';
   }
 }
+
+enum TicketType { base, premium, vip }
 
 class _EventHeaderImage extends StatelessWidget {
   final String? imageUrl;
@@ -360,6 +572,97 @@ class _InfoTile extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TicketTypeSelector extends StatelessWidget {
+  final String label;
+  final String? price;
+  final int quantity;
+  final bool canIncrement;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+
+  const _TicketTypeSelector({
+    required this.label,
+    required this.price,
+    required this.quantity,
+    required this.canIncrement,
+    required this.onIncrement,
+    required this.onDecrement,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isAvailable = price != null;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundColor.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isAvailable
+              ? AppColors.primaryColor.withValues(alpha: 0.22)
+              : Colors.white.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ingresso $label',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryText,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  isAvailable ? price! : 'Indisponível',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.secondaryText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: isAvailable && quantity > 0 ? onDecrement : null,
+                icon: const Icon(Icons.remove_circle_outline_rounded),
+                color: AppColors.primaryColor,
+              ),
+              SizedBox(
+                width: 28,
+                child: Text(
+                  '$quantity',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryText,
+                  ),
+                ),
+              ),
+              if (isAvailable && canIncrement)
+                IconButton(
+                  onPressed: onIncrement,
+                  icon: const Icon(Icons.add_circle_rounded),
+                  color: AppColors.primaryColor,
+                ),
+            ],
           ),
         ],
       ),

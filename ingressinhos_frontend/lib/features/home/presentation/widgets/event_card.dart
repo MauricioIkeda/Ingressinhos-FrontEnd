@@ -9,11 +9,7 @@ class EventCard extends StatelessWidget {
 
   static const double aspectRatio = 1.90;
 
-  const EventCard({
-    super.key,
-    required this.event,
-    this.onTap,
-  });
+  const EventCard({super.key, required this.event, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +23,13 @@ class EventCard extends StatelessWidget {
 
     final imageUrl = event.imageUrl;
     final startTime = _formatDate(event.startTime);
-    final hasSeats = event.hasSeats;
     final availableTickets = event.availableTickets ?? 0;
     final locationLabel = (event.locationName?.trim().isNotEmpty == true)
         ? event.locationName!.trim()
         : 'Local a definir';
+    final sellerName = (event.sellerTradingName?.trim().isNotEmpty == true)
+        ? event.sellerTradingName!.trim()
+        : 'Vendedor desconhecido';
     final ticketPrice = event.baseTicketPrice;
 
     final cardBackground = isDarkMode ? AppColors.surfaceColor : Colors.white;
@@ -63,10 +61,7 @@ class EventCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              cardBackground,
-              cardBackground.withValues(alpha: 0.94),
-            ],
+            colors: [cardBackground, cardBackground.withValues(alpha: 0.94)],
           ),
         ),
         child: Stack(
@@ -195,6 +190,24 @@ class EventCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 locationLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.5,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.person_rounded,
+                              size: 16,
+                              color: secondaryTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                sellerName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
@@ -437,10 +450,7 @@ class _TicketClipper extends CustomClipper<Path> {
     final notchCenterY = size.height * notchPosition;
     final notchLeft = Path()
       ..addOval(
-        Rect.fromCircle(
-          center: Offset(0, notchCenterY),
-          radius: notchRadius,
-        ),
+        Rect.fromCircle(center: Offset(0, notchCenterY), radius: notchRadius),
       );
     final notchRight = Path()
       ..addOval(
@@ -469,10 +479,7 @@ class _TicketBorderPainter extends CustomPainter {
   final _TicketClipper clipper;
   final Color color;
 
-  _TicketBorderPainter({
-    required this.clipper,
-    required this.color,
-  });
+  _TicketBorderPainter({required this.clipper, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
