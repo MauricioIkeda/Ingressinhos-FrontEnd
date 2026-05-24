@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
+import 'package:ingressinhos_frontend/core/widgets/header.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final EventModel event;
@@ -123,20 +124,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
     return IngressinhosScaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: AppBar(
-        elevation: 1,
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: AppColors.appBarBackgroundColor,
-        foregroundColor: AppColors.primaryText,
-        iconTheme: const IconThemeData(color: AppColors.primaryText),
-        title: Text(
-          'Detalhes do evento',
-          style: GoogleFonts.poppins(
-            color: AppColors.primaryColor,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      appBar: const IngressinhosAppBar(
+        title: 'Detalhes do evento',
+        titleFontSize: 22,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),

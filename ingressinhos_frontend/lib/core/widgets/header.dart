@@ -7,10 +7,22 @@ import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 
 class IngressinhosAppBar extends StatelessWidget
     implements PreferredSizeWidget {
-  const IngressinhosAppBar({super.key});
+  const IngressinhosAppBar({
+    super.key,
+    this.title,
+    this.titleFontSize,
+    this.showCartAction = true,
+  });
+
+  final String? title;
+  final double? titleFontSize;
+  final bool showCartAction;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedTitle = title ?? 'Ingressinhos';
+    final resolvedTitleSize = titleFontSize ?? 24;
+
     return AppBar(
       elevation: 1,
       surfaceTintColor: Colors.transparent,
@@ -18,13 +30,22 @@ class IngressinhosAppBar extends StatelessWidget
       iconTheme: IconThemeData(color: AppColors.primaryText),
       backgroundColor: AppColors.appBarBackgroundColor,
       title: Text(
-        'Ingressinhos',
+        resolvedTitle,
         style: GoogleFonts.poppins(
           color: AppColors.primaryColor,
-          fontSize: 24,
+          fontSize: resolvedTitleSize,
           fontWeight: FontWeight.bold,
         ),
       ),
+      actions: showCartAction
+          ? [
+              IconButton(
+                tooltip: 'Carrinho',
+                icon: const Icon(Icons.shopping_cart_outlined),
+                onPressed: () => Navigator.pushNamed(context, '/cart'),
+              ),
+            ]
+          : null,
     );
   }
 

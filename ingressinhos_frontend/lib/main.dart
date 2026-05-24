@@ -7,6 +7,7 @@ import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_pag
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_client_page.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_seller_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/cart_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/register_event_page.dart';
 
@@ -40,6 +41,7 @@ class MainApp extends StatelessWidget {
           '/registerseller': (context) => RegisterSellerPage(),
           '/registerevent': (context) => RegisterEventPage(),
           '/home': (context) => HomePage(),
+          '/cart': (context) => CartPage(),
         },
       ),
     );
