@@ -7,6 +7,7 @@ import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_pag
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_client_page.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_seller_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/cart_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/register_event_page.dart';
@@ -30,7 +31,11 @@ class MainApp extends StatelessWidget {
 
         BlocProvider<EventsCubit>(
           create: (_) => getIt<EventsCubit>(),
-         ),
+        ),
+
+        BlocProvider<CartCubit>(
+          create: (_) => getIt<CartCubit>(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

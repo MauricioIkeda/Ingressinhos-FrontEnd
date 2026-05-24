@@ -1,5 +1,6 @@
 class EventModel {
   int? id;
+  int? ticketId;
   final String name;
   final DateTime startTime;
   final DateTime endTime;
@@ -22,6 +23,7 @@ class EventModel {
 
   EventModel({
     this.id,
+    this.ticketId,
     required this.name,
     required this.startTime,
     required this.endTime,
@@ -50,12 +52,21 @@ class EventModel {
     }
 
     int? extractedAvailableQuantity;
-    if (json['tickets'] != null && json['tickets'] is List && (json['tickets'] as List).isNotEmpty) {
-      extractedAvailableQuantity = parseInt(json['tickets'][0]['availableQuantity']);
+    int? extractedTicketId;
+    if (json['tickets'] != null &&
+        json['tickets'] is List &&
+        (json['tickets'] as List).isNotEmpty) {
+      final firstTicket = json['tickets'][0];
+      if (firstTicket is Map<String, dynamic>) {
+        extractedAvailableQuantity =
+            parseInt(firstTicket['availableQuantity']);
+        extractedTicketId = parseInt(firstTicket['id']);
+      }
     }
 
     return EventModel(
       id: parseInt(json['id']),
+      ticketId: extractedTicketId,
       name: json['name']?.toString() ?? '',
       startTime: DateTime.parse(json['startTime']),
       endTime: DateTime.parse(json['endTime']),

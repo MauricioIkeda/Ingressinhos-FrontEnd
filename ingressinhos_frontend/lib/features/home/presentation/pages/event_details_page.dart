@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
+import 'package:ingressinhos_frontend/features/auth/data/exceptions/ingressinhos_exception.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final EventModel event;
@@ -83,8 +87,31 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     );
   }
 
-  void _onAddToCart() {
+  Future<void> _onAddToCart() async {
     if (_totalTickets <= 0) return;
+
+    try {
+      await context.read<CartCubit>().addTickets(
+            event: widget.event,
+            baseQuantity: _baseQuantity,
+            premiumQuantity: _premiumQuantity,
+            vipQuantity: _vipQuantity,
+          );
+    } on IngressinhosException catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(context, e.message, true);
+      return;
+    } catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(
+        context,
+        e.toString().replaceFirst('Exception: ', ''),
+        true,
+      );
+      return;
+    }
+
+    if (!mounted) return;
 
     final summary = <String>[];
     if (_baseQuantity > 0) summary.add('Base: $_baseQuantity');
@@ -94,7 +121,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Compra iniciada (${summary.join(' • ')}) • Total: ${_formatCurrency(_totalPrice)}',
+          'Ingressos adicionados ao carrinho (${summary.join(' • ')}) • Total: ${_formatCurrency(_totalPrice)}',
           style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
         ),
       ),
