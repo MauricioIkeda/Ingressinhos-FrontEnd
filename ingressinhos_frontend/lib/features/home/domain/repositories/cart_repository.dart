@@ -8,4 +8,8 @@ abstract class CartRepository {
   });
 
   Future<CartModel> getCart({required int clientId});
+
+  Future<void> removeCartItem({required int orderItemId});
+
+  Future<void> resetCart({required int clientId});
 }

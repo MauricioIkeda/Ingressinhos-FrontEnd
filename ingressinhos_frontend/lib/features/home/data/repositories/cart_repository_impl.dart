@@ -25,4 +25,14 @@ class CartRepositoryImpl implements CartRepository {
   Future<CartModel> getCart({required int clientId}) {
     return _remoteDatasource.getCart(clientId: clientId);
   }
+
+  @override
+  Future<void> removeCartItem({required int orderItemId}) {
+    return _remoteDatasource.removeCartItem(orderItemId: orderItemId);
+  }
+
+  @override
+  Future<void> resetCart({required int clientId}) {
+    return _remoteDatasource.resetCart(clientId: clientId);
+  }
 }

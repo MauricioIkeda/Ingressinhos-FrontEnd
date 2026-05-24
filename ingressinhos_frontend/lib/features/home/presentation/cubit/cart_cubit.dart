@@ -52,4 +52,38 @@ class CartCubit extends Cubit<CartState> {
 
     await loadCart(clientId: 0);
   }
+
+  Future<void> removeItem({required int orderItemId}) async {
+    emit(state.copyWith(isLoading: true, errorMessage: null));
+    try {
+      await _cartRepository.removeCartItem(orderItemId: orderItemId);
+      await loadCart(clientId: 0);
+    } on IngressinhosException catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.message));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
+    }
+  }
+
+  Future<void> resetCart({int clientId = 0}) async {
+    emit(state.copyWith(isLoading: true, errorMessage: null));
+    try {
+      await _cartRepository.resetCart(clientId: clientId);
+      await loadCart(clientId: clientId);
+    } on IngressinhosException catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.message));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
+    }
+  }
 }

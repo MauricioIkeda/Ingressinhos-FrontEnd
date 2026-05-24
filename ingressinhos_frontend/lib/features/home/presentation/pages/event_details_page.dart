@@ -190,7 +190,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StatusBadge(isAvailable: event.hasSeats),
+                        _StatusBadge(isAvailable: event.availableTickets != null && event.availableTickets! > 0),
                         const SizedBox(height: 12),
                         Text(
                           title,
@@ -294,7 +294,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     onDecrement: () => _decrementQuantity(TicketType.base),
                   ),
                   if (event.premiumTicketPrice != null &&
-                      event.premiumTicketPrice! > 0.0) ...[
+                      event.premiumTicketPrice! > 0.0 && event.hasSeats) ...[
                     const SizedBox(height: 12),
                     _TicketTypeSelector(
                       label: 'Premium',
@@ -308,7 +308,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     ),
                   ],
                   if (event.vipTicketPrice != null &&
-                      event.vipTicketPrice! > 0.0) ...[
+                      event.vipTicketPrice! > 0.0 && event.hasSeats) ...[
                     const SizedBox(height: 12),
                     _TicketTypeSelector(
                       label: 'VIP',

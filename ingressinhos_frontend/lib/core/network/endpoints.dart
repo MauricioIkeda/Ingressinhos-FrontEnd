@@ -26,4 +26,7 @@ class Endpoints {
   static const tickets = '/api/tickets'; // Para buscar tickets
   static const cartItems = '/api/orders/cart/items';
   static String cartByClient(int clientId) => '/api/orders/cart/$clientId';
+  static String cartItemById(int orderItemId) =>
+      '/api/orders/cart/items/$orderItemId';
+  static String cartReset(int clientId) => '/api/orders/cart/reset/$clientId';
 }

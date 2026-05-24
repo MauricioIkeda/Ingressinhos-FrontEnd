@@ -54,4 +54,38 @@ class CartRemoteDatasourceImpl implements CartRemoteDatasource {
       );
     }
   }
+
+  @override
+  Future<void> removeCartItem({required int orderItemId}) async {
+    try {
+      await _ingressinhosClient.dio.delete(
+        Endpoints.cartItemById(orderItemId),
+      );
+    } on DioException catch (e) {
+      throw IngressinhosException(
+        mapDioError(e, 'Erro ao remover item do carrinho'),
+      );
+    } catch (e) {
+      throw IngressinhosException(
+        e.toString().replaceFirst('Exception: ', ''),
+      );
+    }
+  }
+
+  @override
+  Future<void> resetCart({required int clientId}) async {
+    try {
+      await _ingressinhosClient.dio.delete(
+        Endpoints.cartReset(clientId),
+      );
+    } on DioException catch (e) {
+      throw IngressinhosException(
+        mapDioError(e, 'Erro ao resetar carrinho'),
+      );
+    } catch (e) {
+      throw IngressinhosException(
+        e.toString().replaceFirst('Exception: ', ''),
+      );
+    }
+  }
 }

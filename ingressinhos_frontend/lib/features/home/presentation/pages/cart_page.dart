@@ -48,10 +48,6 @@ class _CartPageState extends State<CartPage> {
 
           if (state.isEmpty) {
             return _EmptyCart(onExplore: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-                return;
-              }
               Navigator.pushReplacementNamed(context, '/home');
             });
           }
@@ -59,7 +55,15 @@ class _CartPageState extends State<CartPage> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             children: [
-              ...state.items.map((item) => _CartItemCard(item: item)),
+              ...state.items.map(
+                (item) => _CartItemCard(
+                  item: item,
+                  onRemove: item.id == null
+                      ? null
+                      : () =>
+                          context.read<CartCubit>().removeItem(orderItemId: item.id!),
+                ),
+              ),
               const SizedBox(height: 16),
               _CartSummaryCard(
                 totalTickets: state.totalTickets,
@@ -97,6 +101,19 @@ class _CartPageState extends State<CartPage> {
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: state.items.isNotEmpty
+                    ? () => context.read<CartCubit>().resetCart()
+                    : null,
+                child: Text(
+                  'Limpar carrinho',
+                  style: GoogleFonts.poppins(
+                    color: AppColors.secondaryText,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -238,9 +255,10 @@ class _EmptyCart extends StatelessWidget {
 }
 
 class _CartItemCard extends StatelessWidget {
-  const _CartItemCard({required this.item});
+  const _CartItemCard({required this.item, this.onRemove});
 
   final CartItemModel item;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -259,13 +277,26 @@ class _CartItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            item.ticketName,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryText,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.ticketName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryText,
+                  ),
+                ),
+              ),
+              if (onRemove != null)
+                IconButton(
+                  tooltip: 'Remover',
+                  icon: const Icon(Icons.close_rounded),
+                  color: AppColors.secondaryText,
+                  onPressed: onRemove,
+                ),
+            ],
           ),
           const SizedBox(height: 6),
           Wrap(

@@ -33,7 +33,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
   DateTime? salesStartsAt;
   DateTime? salesEndsAt;
   int? selectedLocationId;
-  bool hasSeats = true;
+  bool hasSeats = false;
 
   late final DateTime _previewFallbackDate;
   List<LocationModel> locations = [];
@@ -97,7 +97,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     });
   }
 
-    Future<void> _selectDateTimeSales(bool isStart) async {
+  Future<void> _selectDateTimeSales(bool isStart) async {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -156,7 +156,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       );
 
       context.read<EventsCubit>().createEvent(event);
-    }else{
+    } else {
       showErrorSnackBar(context, 'Preencha todos os campos obrigatórios', true);
     }
   }
@@ -307,6 +307,12 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
                 icon: Icons.schedule_rounded,
               ),
               const SizedBox(height: 22),
+              _buildSectionTitle('Local e capacidade'),
+              const SizedBox(height: 12),
+              _buildLocationField(),
+              const SizedBox(height: 16),
+              _buildSeatsSwitch(),
+              const SizedBox(height: 22),
               _buildSectionTitle('Valores dos ingressos'),
               const SizedBox(height: 12),
               _buildTextField(
@@ -315,20 +321,22 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
                 icon: Icons.confirmation_num_rounded,
                 onChanged: (_) => setState(() {}),
               ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                'Preço do Ingresso Premium',
-                premiumTicketPriceController,
-                icon: Icons.confirmation_num_rounded,
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                'Preço do Ingresso VIP',
-                vipTicketPriceController,
-                icon: Icons.confirmation_num_rounded,
-                onChanged: (_) => setState(() {}),
-              ),
+              if (hasSeats) ...[
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'Preço do Ingresso Premium',
+                  premiumTicketPriceController,
+                  icon: Icons.confirmation_num_rounded,
+                  onChanged: (_) => setState(() {}),
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'Preço do Ingresso VIP',
+                  vipTicketPriceController,
+                  icon: Icons.confirmation_num_rounded,
+                  onChanged: (_) => setState(() {}),
+                ),
+              ],
               const SizedBox(height: 16),
               _buildDateTimeField(
                 label: 'Data de Início das Vendas (obrigatório)',
@@ -343,12 +351,6 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
                 onTap: () => _selectDateTimeSales(false),
                 icon: Icons.schedule_rounded,
               ),
-              const SizedBox(height: 22),
-              _buildSectionTitle('Local e capacidade'),
-              const SizedBox(height: 12),
-              _buildLocationField(),
-              const SizedBox(height: 16),
-              _buildSeatsSwitch(),
               const SizedBox(height: 22),
               _buildSectionTitle('Descrição e mídia'),
               const SizedBox(height: 12),
@@ -460,7 +462,10 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     return DropdownButtonFormField<int>(
       value: selectedLocationId,
       isExpanded: true,
-      decoration: _inputDecoration('Localização (obrigatório)', icon: Icons.place_rounded),
+      decoration: _inputDecoration(
+        'Localização (obrigatório)',
+        icon: Icons.place_rounded,
+      ),
       icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryColor),
       dropdownColor: AppColors.surfaceColor,
       style: GoogleFonts.poppins(color: AppColors.primaryText, fontSize: 16),
@@ -490,10 +495,10 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       ),
       child: SwitchListTile.adaptive(
         value: hasSeats,
-        onChanged: (val) => setState(() => hasSeats = val),
+        onChanged: null, //(val) => setState(() => hasSeats = val),
         activeColor: AppColors.primaryColor,
         title: Text(
-          'Evento com assentos',
+          'Evento com assentos (COMING SOON)',
           style: GoogleFonts.poppins(
             color: AppColors.primaryText,
             fontWeight: FontWeight.w600,
