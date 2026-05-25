@@ -1,4 +1,5 @@
 import 'package:ingressinhos_frontend/core/data/models/cart_model.dart';
+import 'package:ingressinhos_frontend/core/data/models/checkout_response_model.dart';
 
 abstract class CartRepository {
   Future<void> addCartItem({
@@ -13,5 +14,5 @@ abstract class CartRepository {
 
   Future<void> resetCart({required int clientId});
   
-  Future<void> checkout({required int orderId});
+  Future<CheckoutResponseModel> checkout({required int orderId});
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ingressinhos_frontend/core/data/models/checkout_response_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/ingressinhos_exception.dart';
 import 'package:ingressinhos_frontend/features/home/domain/repositories/cart_repository.dart';
@@ -87,13 +88,15 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  Future<void> checkout({int orderId = 0}) async {
+  Future<CheckoutResponseModel?> checkout({int orderId = 0}) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
-      await _cartRepository.checkout(orderId: orderId);
-      await loadCart(clientId: orderId);
+      final checkoutResponse = await _cartRepository.checkout(orderId: orderId);
+      await loadCart(clientId: 0);
+      return checkoutResponse;
     } on IngressinhosException catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.message));
+      return null;
     } catch (e) {
       emit(
         state.copyWith(
@@ -101,6 +104,7 @@ class CartCubit extends Cubit<CartState> {
           errorMessage: e.toString().replaceFirst('Exception: ', ''),
         ),
       );
+      return null;
     }
   }
 }

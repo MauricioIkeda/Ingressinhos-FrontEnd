@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/cart_item_model.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
+import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_state.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -77,8 +80,49 @@ class _CartPageState extends State<CartPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: state.totalAmount > 0
-                      ? () {
-                          context.read<CartCubit>().checkout(orderId: state.cart!.id!);
+                      ? () async {
+                          final checkout = await context
+                              .read<CartCubit>()
+                              .checkout(orderId: state.cart!.id!);
+                          if (!context.mounted) return;
+                          final payload = checkout?.qrCode?.payload?.trim();
+                          if (payload == null || payload.isEmpty) {
+                            showErrorSnackBar(
+                              context,
+                              'Não foi possível abrir o pagamento.',
+                              true,
+                            );
+                            return;
+                          }
+                          final uri = Uri.tryParse(payload);
+                          if (uri == null) {
+                            showErrorSnackBar(
+                              context,
+                              'Link de pagamento inválido.',
+                              true,
+                            );
+                            return;
+                          }
+                          try {
+                            final launched = await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                            if (!launched && context.mounted) {
+                              showErrorSnackBar(
+                                context,
+                                'Não foi possível abrir o pagamento.',
+                                true,
+                              );
+                            }
+                          } on PlatformException {
+                            if (!context.mounted) return;
+                            showErrorSnackBar(
+                              context,
+                              'Não foi possível abrir o pagamento.',
+                              true,
+                            );
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(

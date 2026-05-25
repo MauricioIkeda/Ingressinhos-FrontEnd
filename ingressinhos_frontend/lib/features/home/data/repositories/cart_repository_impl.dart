@@ -1,4 +1,5 @@
 import 'package:ingressinhos_frontend/core/data/models/cart_model.dart';
+import 'package:ingressinhos_frontend/core/data/models/checkout_response_model.dart';
 import 'package:ingressinhos_frontend/features/home/data/datasource/cart_remote_datasource.dart';
 import 'package:ingressinhos_frontend/features/home/domain/repositories/cart_repository.dart';
 
@@ -37,7 +38,7 @@ class CartRepositoryImpl implements CartRepository {
   }
 
   @override
-  Future<void> checkout({required int orderId}) {
+  Future<CheckoutResponseModel> checkout({required int orderId}) {
     return _remoteDatasource.checkout(orderId: orderId);
   }
 }

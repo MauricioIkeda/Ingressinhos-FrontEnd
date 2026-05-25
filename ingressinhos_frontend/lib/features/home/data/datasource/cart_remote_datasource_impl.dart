@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:ingressinhos_frontend/core/data/models/cart_model.dart';
+import 'package:ingressinhos_frontend/core/data/models/checkout_response_model.dart';
 import 'package:ingressinhos_frontend/core/network/clients/ingressinhos_dio_client.dart';
 import 'package:ingressinhos_frontend/core/network/endpoints.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/ingressinhos_exception.dart';
@@ -90,11 +91,16 @@ class CartRemoteDatasourceImpl implements CartRemoteDatasource {
   }
 
   @override
-  Future<void> checkout({required int orderId}) async {
+  Future<CheckoutResponseModel> checkout({required int orderId}) async {
     try {
-      await _ingressinhosClient.dio.patch(
+      final response = await _ingressinhosClient.dio.patch(
         Endpoints.cartCheckout(orderId),
       );
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return CheckoutResponseModel.fromJson(data);
+      }
+      throw IngressinhosException('Resposta inválida ao finalizar compra');
     } on DioException catch (e) {
       throw IngressinhosException(
         mapDioError(e, 'Erro ao finalizar compra'),
