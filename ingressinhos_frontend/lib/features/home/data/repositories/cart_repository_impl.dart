@@ -35,4 +35,9 @@ class CartRepositoryImpl implements CartRepository {
   Future<void> resetCart({required int clientId}) {
     return _remoteDatasource.resetCart(clientId: clientId);
   }
+
+  @override
+  Future<void> checkout({required int orderId}) {
+    return _remoteDatasource.checkout(orderId: orderId);
+  }
 }

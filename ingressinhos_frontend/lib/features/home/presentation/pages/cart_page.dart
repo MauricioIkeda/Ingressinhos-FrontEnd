@@ -47,9 +47,11 @@ class _CartPageState extends State<CartPage> {
           }
 
           if (state.isEmpty) {
-            return _EmptyCart(onExplore: () {
-              Navigator.pushReplacementNamed(context, '/home');
-            });
+            return _EmptyCart(
+              onExplore: () {
+                Navigator.pushReplacementNamed(context, '/home');
+              },
+            );
           }
 
           return ListView(
@@ -60,8 +62,9 @@ class _CartPageState extends State<CartPage> {
                   item: item,
                   onRemove: item.id == null
                       ? null
-                      : () =>
-                          context.read<CartCubit>().removeItem(orderItemId: item.id!),
+                      : () => context.read<CartCubit>().removeItem(
+                          orderItemId: item.id!,
+                        ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -75,16 +78,7 @@ class _CartPageState extends State<CartPage> {
                 child: ElevatedButton(
                   onPressed: state.totalAmount > 0
                       ? () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Checkout iniciado • Total: ${_formatCurrency(state.totalAmount)}',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          );
+                          context.read<CartCubit>().checkout(orderId: state.cart!.id!);
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -305,9 +299,7 @@ class _CartItemCard extends StatelessWidget {
             children: [
               _InfoChip(text: categoryLabel),
               _InfoChip(text: 'Quantidade: ${item.quantity}'),
-              _InfoChip(
-                text: 'Unitário: ${_formatCurrency(item.unitPrice)}',
-              ),
+              _InfoChip(text: 'Unitário: ${_formatCurrency(item.unitPrice)}'),
               if (item.seatCode != null && item.seatCode!.trim().isNotEmpty)
                 _InfoChip(text: 'Assento: ${item.seatCode}'),
             ],

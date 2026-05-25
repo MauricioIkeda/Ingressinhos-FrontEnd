@@ -88,4 +88,21 @@ class CartRemoteDatasourceImpl implements CartRemoteDatasource {
       );
     }
   }
+
+  @override
+  Future<void> checkout({required int orderId}) async {
+    try {
+      await _ingressinhosClient.dio.patch(
+        Endpoints.cartCheckout(orderId),
+      );
+    } on DioException catch (e) {
+      throw IngressinhosException(
+        mapDioError(e, 'Erro ao finalizar compra'),
+      );
+    } catch (e) {
+      throw IngressinhosException(
+        e.toString().replaceFirst('Exception: ', ''),
+      );
+    }
+  }
 }

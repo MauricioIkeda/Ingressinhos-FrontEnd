@@ -86,4 +86,21 @@ class CartCubit extends Cubit<CartState> {
       );
     }
   }
+
+  Future<void> checkout({int orderId = 0}) async {
+    emit(state.copyWith(isLoading: true, errorMessage: null));
+    try {
+      await _cartRepository.checkout(orderId: orderId);
+      await loadCart(clientId: orderId);
+    } on IngressinhosException catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.message));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
+    }
+  }
 }

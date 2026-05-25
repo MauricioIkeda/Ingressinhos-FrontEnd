@@ -12,4 +12,6 @@ abstract class CartRepository {
   Future<void> removeCartItem({required int orderItemId});
 
   Future<void> resetCart({required int clientId});
+  
+  Future<void> checkout({required int orderId});
 }
