@@ -79,7 +79,7 @@ class _CartPageState extends State<CartPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: state.totalAmount > 0
+                  onPressed: state.items.isNotEmpty
                       ? () async {
                           final checkout = await context
                               .read<CartCubit>()

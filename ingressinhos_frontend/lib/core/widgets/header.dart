@@ -84,7 +84,7 @@ class IngressinhosDrawer extends StatelessWidget {
                         ),
                         child: Center(
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisSize: MainAxisSize.max,
                             children: [
                               const CircleAvatar(
                                 radius: 32,
@@ -96,7 +96,7 @@ class IngressinhosDrawer extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              _buildUserInfo(snapshot, user),
+                              Expanded(child: _buildUserInfo(snapshot, user)),
                             ],
                           ),
                         ),
