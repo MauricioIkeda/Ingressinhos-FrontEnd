@@ -42,12 +42,12 @@ class _CartPageState extends State<CartPage> {
             );
           }
 
-          if (state.errorMessage != null) {
+          /*if (state.errorMessage != null) {
             return _CartError(
               message: state.errorMessage!,
               onRetry: () => context.read<CartCubit>().loadCart(),
             );
-          }
+          }*/
 
           if (state.isEmpty) {
             return _EmptyCart(

@@ -8,8 +8,10 @@ import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_seller_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/issued_tickets_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/cart_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/home_page.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/my_tickets_page.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/register_event_page.dart';
 
 void main() {
@@ -36,6 +38,10 @@ class MainApp extends StatelessWidget {
         BlocProvider<CartCubit>(
           create: (_) => getIt<CartCubit>(),
         ),
+
+        BlocProvider<IssuedTicketsCubit>(
+          create: (_) => getIt<IssuedTicketsCubit>(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -47,6 +53,7 @@ class MainApp extends StatelessWidget {
           '/registerevent': (context) => RegisterEventPage(),
           '/home': (context) => HomePage(),
           '/cart': (context) => CartPage(),
+          '/mytickets': (context) => MyTicketsPage(),
         },
       ),
     );

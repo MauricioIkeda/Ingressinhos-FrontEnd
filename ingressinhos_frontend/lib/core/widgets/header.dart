@@ -113,7 +113,10 @@ class IngressinhosDrawer extends StatelessWidget {
                       _buildMenuItem(
                         Icons.confirmation_num_sharp,
                         'Meus Ingressos',
-                        () => Navigator.pop(context),
+                        () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/mytickets');
+                        },
                       ),
 
                       if (isSeller)

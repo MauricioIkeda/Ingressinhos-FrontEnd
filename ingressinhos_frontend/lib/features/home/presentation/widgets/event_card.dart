@@ -151,7 +151,7 @@ class EventCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: 12.5,
-                            height: 1.4,
+                            height: 1.3,
                             color: secondaryTextColor,
                           ),
                         ),

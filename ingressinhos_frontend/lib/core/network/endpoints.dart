@@ -24,6 +24,7 @@ class Endpoints {
   static const eventsWithTickets = '/api/events/WithTickets';
   static const locations = '/api/locations'; // Para buscar localizações
   static const tickets = '/api/tickets'; // Para buscar tickets
+  static const issuedTicketsMe = '/api/issued-tickets/me';
   static const cartItems = '/api/orders/cart/items';
   static String cartByClient(int clientId) => '/api/orders/cart/$clientId';
   static String cartItemById(int orderItemId) =>
