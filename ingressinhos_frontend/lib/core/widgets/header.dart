@@ -129,6 +129,16 @@ class IngressinhosDrawer extends StatelessWidget {
                           },
                         ),
 
+                      if (isSeller)
+                        _buildMenuItem(
+                          Icons.edit_rounded,
+                          'Editar Evento',
+                          () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, '/seller-events');
+                          },
+                        ),
+
                       _buildMenuItem(
                         Icons.settings,
                         'Configurações',

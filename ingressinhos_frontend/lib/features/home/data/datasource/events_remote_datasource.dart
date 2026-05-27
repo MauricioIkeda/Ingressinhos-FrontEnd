@@ -6,8 +6,11 @@ abstract class EventsRemoteDatasource{
     int skip = 0,
     int top = 4,
     String orderBy = 'startTime asc',
+    int? sellerId,
   });
   Future<List<LocationModel>> getAllLocations();
   
   Future<void> createEvent(EventModel eventModel);
+  Future<void> updateEvent(int eventId, EventModel eventModel);
+  Future<void> deleteEvent(int eventId);
 }

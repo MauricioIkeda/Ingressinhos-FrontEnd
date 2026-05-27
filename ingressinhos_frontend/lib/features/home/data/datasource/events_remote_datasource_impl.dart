@@ -18,15 +18,21 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
     int skip = 0,
     int top = 4,
     String orderBy = 'startTime asc',
+    int? sellerId,
   }) async {
     try {
+      final queryParameters = {
+        r'$top': top,
+        r'$skip': skip,
+        r'$orderby': orderBy,
+      };
+      if (sellerId != null) {
+        queryParameters['sellerId'] = sellerId;
+      }
+
       final response = await _ingressinhosClient.dio.get(
         Endpoints.eventsWithTickets,
-        queryParameters: {
-          r'$top': top,
-          r'$skip': skip,
-          r'$orderby': orderBy,
-        },
+        queryParameters: queryParameters,
       );
 
       final data = response.data['data'] as List? ?? [];
@@ -70,6 +76,29 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
       throw IngressinhosException(mapDioError(e, 'Erro ao criar evento'));
     } catch (e) {
       throw IngressinhosException('Erro do front burro cansado por algum motivo: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> updateEvent(int eventId, EventModel eventModel) async {
+    try {
+      final payload = eventModel.toJson();
+      payload['eventId'] = eventId;
+      await _ingressinhosClient.dio.put(
+        Endpoints.eventos,
+        data: payload,
+      );
+    } on DioException catch (e) {
+      throw IngressinhosException(mapDioError(e, 'Erro ao atualizar evento'));
+    }
+  }
+
+  @override
+  Future<void> deleteEvent(int eventId) async {
+    try {
+      await _ingressinhosClient.dio.delete('${Endpoints.eventos}/$eventId');
+    } on DioException catch (e) {
+      throw IngressinhosException(mapDioError(e, 'Erro ao apagar evento'));
     }
   }
 }

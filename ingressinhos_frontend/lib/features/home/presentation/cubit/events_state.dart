@@ -37,3 +37,19 @@ class EventsCreated extends EventsState {
 class EventCreating extends EventsState {
   const EventCreating();
 }
+
+class EventUpdating extends EventsState {
+  const EventUpdating();
+}
+
+class EventsUpdated extends EventsState {
+  const EventsUpdated();
+}
+
+class EventDeleting extends EventsState {
+  const EventDeleting();
+}
+
+class EventsDeleted extends EventsState {
+  const EventsDeleted();
+}

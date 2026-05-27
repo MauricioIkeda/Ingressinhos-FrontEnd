@@ -98,6 +98,34 @@ class EventsCubit extends Cubit<EventsState> {
     }
   }
 
+  Future<void> updateEvent(int eventId, EventModel event) async {
+    emit(const EventUpdating());
+
+    try {
+      await _eventRepository.updateEvent(eventId, event);
+      await loadEvents(reset: true);
+      emit(const EventsUpdated());
+    } on IngressinhosException catch (e) {
+      emit(EventsError(e.message));
+    } catch (e) {
+      emit(EventsError(e.toString().replaceFirst('Exception: ', '')));
+    }
+  }
+
+  Future<void> deleteEvent(int eventId) async {
+    emit(const EventDeleting());
+
+    try {
+      await _eventRepository.deleteEvent(eventId);
+      await loadEvents(reset: true);
+      emit(const EventsDeleted());
+    } on IngressinhosException catch (e) {
+      emit(EventsError(e.message));
+    } catch (e) {
+      emit(EventsError(e.toString().replaceFirst('Exception: ', '')));
+    }
+  }
+
   Future<List<LocationModel>> loadLocations() async {
     try {
       final locations = await _eventRepository.getAllLocations();

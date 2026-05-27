@@ -8,6 +8,7 @@ import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/ingressinhos_exception.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/edit_event_page.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final EventModel event;
@@ -404,6 +405,37 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 ),
               ),
             ),
+            if (event.id != null) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => EditEventPage(event: event),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryColor,
+                    side: BorderSide(color: AppColors.primaryColor),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Icon(Icons.edit_rounded),
+                  label: Text(
+                    'Editar evento',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

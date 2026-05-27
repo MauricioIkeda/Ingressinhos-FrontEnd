@@ -21,6 +21,7 @@ import 'package:ingressinhos_frontend/features/home/domain/repositories/events_r
 import 'package:ingressinhos_frontend/features/home/domain/repositories/issued_tickets_repository.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/seller_events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/issued_tickets_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -90,6 +91,13 @@ void setup() {
   getIt.registerFactory(
     () => EventsCubit(
       eventRepository: getIt<EventsRepository>()
+    ),
+  );
+
+  getIt.registerFactory(
+    () => SellerEventsCubit(
+      eventRepository: getIt<EventsRepository>(),
+      storage: getIt<SecureStorageService>(),
     ),
   );
 

@@ -4,19 +4,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
-import 'package:ingressinhos_frontend/features/home/presentation/cubit/issued_tickets_cubit.dart';
-import 'package:ingressinhos_frontend/features/home/presentation/cubit/issued_tickets_state.dart';
-import 'package:ingressinhos_frontend/features/home/presentation/pages/issued_ticket_details_page.dart';
-import 'package:ingressinhos_frontend/features/home/presentation/widgets/issued_ticket_card.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/seller_events_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/seller_events_state.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/pages/edit_event_page.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/widgets/event_card.dart';
 
-class MyTicketsPage extends StatefulWidget {
-  const MyTicketsPage({super.key});
+class SellerEventsPage extends StatefulWidget {
+  const SellerEventsPage({super.key});
 
   @override
-  State<MyTicketsPage> createState() => _MyTicketsPageState();
+  State<SellerEventsPage> createState() => _SellerEventsPageState();
 }
 
-class _MyTicketsPageState extends State<MyTicketsPage> {
+class _SellerEventsPageState extends State<SellerEventsPage> {
   late final ScrollController _scrollController;
 
   @override
@@ -24,7 +24,7 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<IssuedTicketsCubit>().loadTickets(reset: true);
+      context.read<SellerEventsCubit>().loadEvents(reset: true);
     });
   }
 
@@ -40,7 +40,7 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 240) {
-      context.read<IssuedTicketsCubit>().loadMoreTickets();
+      context.read<SellerEventsCubit>().loadMoreEvents();
     }
   }
 
@@ -49,19 +49,19 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
     return IngressinhosScaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: const IngressinhosAppBar(
-        title: 'Meus ingressos',
+        title: 'Meus eventos',
         titleFontSize: 22,
         showCartAction: false,
       ),
-      body: BlocBuilder<IssuedTicketsCubit, IssuedTicketsState>(
+      body: BlocBuilder<SellerEventsCubit, SellerEventsState>(
         builder: (context, state) {
-          if (state is IssuedTicketsLoading) {
+          if (state is SellerEventsLoading) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
-          if (state is IssuedTicketsError) {
+          if (state is SellerEventsError) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -80,7 +80,7 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                       onPressed: () =>
-                          context.read<IssuedTicketsCubit>().loadTickets(
+                          context.read<SellerEventsCubit>().loadEvents(
                             reset: true,
                           ),
                       icon: const Icon(Icons.refresh),
@@ -95,11 +95,11 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
             );
           }
 
-          if (state is IssuedTicketsLoaded) {
-            if (state.tickets.isEmpty) {
+          if (state is SellerEventsLoaded) {
+            if (state.events.isEmpty) {
               return Center(
                 child: Text(
-                  'Nenhum ingresso encontrado.',
+                  'Nenhum evento encontrado.',
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.grey,
@@ -122,25 +122,24 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
                     crossAxisCount: crossAxisCount,
                     mainAxisSpacing: 20,
                     crossAxisSpacing: 20,
-                    childAspectRatio: IssuedTicketCard.aspectRatio,
+                    childAspectRatio: EventCard.aspectRatio,
                   ),
-                  itemCount: state.tickets.length + (showLoadingTile ? 1 : 0),
+                  itemCount: state.events.length + (showLoadingTile ? 1 : 0),
                   itemBuilder: (context, index) {
-                    if (index >= state.tickets.length) {
+                    if (index >= state.events.length) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryColor,
                         ),
                       );
                     }
-                    final ticket = state.tickets[index];
-                    return IssuedTicketCard(
-                      ticket: ticket,
+                    final event = state.events[index];
+                    return EventCard(
+                      event: event,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) =>
-                                IssuedTicketDetailsPage(ticket: ticket),
+                            builder: (_) => EditEventPage(event: event),
                           ),
                         );
                       },
@@ -153,7 +152,7 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
 
           return Center(
             child: Text(
-              'Nenhum ingresso encontrado.',
+              'Nenhum evento encontrado.',
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 color: Colors.grey,

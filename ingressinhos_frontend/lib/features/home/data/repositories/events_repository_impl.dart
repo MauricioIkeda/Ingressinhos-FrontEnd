@@ -17,12 +17,14 @@ class EventsRepositoryImpl implements EventsRepository {
     int skip = 0,
     int top = 4,
     String orderBy = 'startTime asc',
+    int? sellerId,
   }) async {
     try {
       List<EventModel> eventsData = await remoteDatasource.getEvents(
         skip: skip,
         top: top,
         orderBy: orderBy,
+        sellerId: sellerId,
       );
 
       return eventsData;
@@ -51,6 +53,24 @@ class EventsRepositoryImpl implements EventsRepository {
       await remoteDatasource.createEvent(eventModel);
     } on Exception catch (e) {
       throw Exception('Erro ao criar evento: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> updateEvent(int eventId, EventModel eventModel) async {
+    try {
+      await remoteDatasource.updateEvent(eventId, eventModel);
+    } on Exception catch (e) {
+      throw Exception('Erro ao atualizar evento: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> deleteEvent(int eventId) async {
+    try {
+      await remoteDatasource.deleteEvent(eventId);
+    } on Exception catch (e) {
+      throw Exception('Erro ao apagar evento: ${e.toString()}');
     }
   }
 }

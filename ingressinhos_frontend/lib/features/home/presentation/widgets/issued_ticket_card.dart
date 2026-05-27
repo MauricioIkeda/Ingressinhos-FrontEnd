@@ -5,26 +5,21 @@ import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 
 class IssuedTicketCard extends StatelessWidget {
   final IssuedTicketModel ticket;
+  final VoidCallback? onTap;
 
   static const double aspectRatio = 1.90;
 
-  const IssuedTicketCard({super.key, required this.ticket});
+  const IssuedTicketCard({super.key, required this.ticket, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final cardBackground = isDarkMode ? AppColors.surfaceColor : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = isDarkMode
-        ? Colors.grey.shade400
-        : Colors.grey.shade700;
-    final borderColor = isDarkMode
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.black.withValues(alpha: 0.08);
 
     final title = ticket.eventName.trim().isNotEmpty
         ? ticket.eventName
         : 'Evento sem nome';
+    final dateLabel =
+        _formatDate(ticket.eventStartTimeUtc ?? ticket.issuedAtUtc);
     final locationLabel = (ticket.locationName?.trim().isNotEmpty == true)
         ? ticket.locationName!.trim()
         : 'Local a definir';
@@ -34,55 +29,89 @@ class IssuedTicketCard extends StatelessWidget {
     final categoryLabel = (ticket.category?.trim().isNotEmpty == true)
         ? ticket.category!.trim()
         : 'Categoria';
-    final statusLabel = ticket.status.trim().isNotEmpty
-        ? ticket.status.trim()
-        : 'Issued';
     final accessCodeLabel = ticket.accessCode.trim().isNotEmpty
         ? ticket.accessCode.trim()
         : 'Sem codigo';
-    final dateLabel =
-        _formatDate(ticket.eventStartTimeUtc ?? ticket.issuedAtUtc);
+    final statusLabel = ticket.status.trim().isNotEmpty
+        ? ticket.status.trim()
+        : 'Issued';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBackground,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
+    final cardBackground = isDarkMode ? AppColors.surfaceColor : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = isDarkMode
+        ? Colors.grey.shade400
+        : Colors.grey.shade700;
+    final borderColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.08);
+
+    final clipper = _TicketClipper(
+      cornerRadius: 20,
+      notchRadius: 14,
+      notchPosition: 0.5,
+    );
+
+    final card = PhysicalShape(
+      clipper: clipper,
+      elevation: 12,
+      color: Colors.transparent,
+      shadowColor: Colors.black.withValues(alpha: 0.45),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [cardBackground, cardBackground.withValues(alpha: 0.94)],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 5,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(20),
-              ),
-              child: _TicketImage(imageUrl: ticket.eventImageUrl),
-            ),
-          ),
-          Expanded(
-            flex: 7,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+        ),
+        child: Stack(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Expanded(
-                        child: Text(
+                      _TicketImage(imageUrl: ticket.eventImageUrl),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.85),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: _Badge(
+                          text: statusLabel.toUpperCase(),
+                          backgroundColor: _statusColor(statusLabel),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 3),
+                _TicketDivider(color: borderColor),
+                Expanded(
+                  flex: 7,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: 16.5,
                             fontWeight: FontWeight.w700,
                             height: 1.15,
                             color: isDarkMode
@@ -90,127 +119,144 @@ class IssuedTicketCard extends StatelessWidget {
                                 : AppColors.primaryColor,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      _StatusBadge(
-                        text: statusLabel,
-                        color: _statusColor(statusLabel),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month_rounded,
-                        size: 16,
-                        color: secondaryTextColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          dateLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: textColor,
-                          ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_month_rounded,
+                              size: 16,
+                              color: secondaryTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                dateLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.place_rounded,
-                        size: 16,
-                        color: secondaryTextColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          locationLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12.5,
-                            color: secondaryTextColor,
-                          ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.confirmation_number_outlined,
+                              size: 16,
+                              color: secondaryTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                ticketLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.5,
+                                  height: 1.3,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.confirmation_number_outlined,
-                        size: 16,
-                        color: secondaryTextColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          ticketLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: secondaryTextColor,
-                          ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.local_activity_outlined,
+                              size: 16,
+                              color: secondaryTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                categoryLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.5,
+                                  height: 1.3,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.local_activity_outlined,
-                        size: 16,
-                        color: secondaryTextColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          categoryLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: secondaryTextColor,
-                          ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.place_rounded,
+                              size: 16,
+                              color: secondaryTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                locationLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.5,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.key_rounded,
+                              size: 16,
+                              color: secondaryTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                accessCodeLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.5,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.key_rounded,
-                        size: 16,
-                        color: secondaryTextColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        accessCodeLabel,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: secondaryTextColor,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
+                ),
+              ],
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _TicketBorderPainter(
+                    clipper: clipper,
+                    color: borderColor,
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+
+    if (onTap == null) {
+      return card;
+    }
+
+    return GestureDetector(onTap: onTap, child: card);
   }
 
   String _formatDate(DateTime? date) {
@@ -286,30 +332,193 @@ class _TicketImage extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
+class _Badge extends StatelessWidget {
   final String text;
-  final Color color;
+  final Color backgroundColor;
 
-  const _StatusBadge({required this.text, required this.color});
+  const _Badge({required this.text, required this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.18),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: backgroundColor.withValues(alpha: 0.5),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Text(
-        text.toUpperCase(),
+        text,
         style: GoogleFonts.poppins(
-          fontSize: 10.5,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: color,
-          letterSpacing: 0.4,
+          color: Colors.white,
+          letterSpacing: 0.6,
         ),
       ),
     );
+  }
+}
+
+class _TicketDivider extends StatelessWidget {
+  final Color color;
+
+  const _TicketDivider({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: double.infinity,
+      child: CustomPaint(
+        painter: _DashedLinePainter(color: color, axis: Axis.vertical),
+      ),
+    );
+  }
+}
+
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+  final Axis axis;
+
+  _DashedLinePainter({required this.color, this.axis = Axis.horizontal});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+
+    if (axis == Axis.horizontal) {
+      final y = size.height / 2;
+      paint.shader = LinearGradient(
+        colors: [
+          color.withValues(alpha: 0.0),
+          color,
+          color,
+          color.withValues(alpha: 0.0),
+        ],
+        stops: const [0.0, 0.15, 0.85, 1.0],
+      ).createShader(Rect.fromLTWH(0, y - 1, size.width, 2));
+
+      const dashWidth = 7.0;
+      const dashGap = 5.0;
+      double x = 0;
+      while (x < size.width) {
+        final nextX = x + dashWidth;
+        canvas.drawLine(
+          Offset(x, y),
+          Offset(nextX.clamp(0, size.width), y),
+          paint,
+        );
+        x += dashWidth + dashGap;
+      }
+      return;
+    }
+
+    final x = size.width / 2;
+    paint.shader = LinearGradient(
+      colors: [
+        color.withValues(alpha: 0.0),
+        color,
+        color,
+        color.withValues(alpha: 0.0),
+      ],
+      stops: const [0.0, 0.15, 0.85, 1.0],
+    ).createShader(Rect.fromLTWH(x - 1, 0, 2, size.height));
+
+    const dashHeight = 7.0;
+    const dashGap = 5.0;
+    double y = 0;
+    while (y < size.height) {
+      final nextY = y + dashHeight;
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x, nextY.clamp(0, size.height)),
+        paint,
+      );
+      y += dashHeight + dashGap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedLinePainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.axis != axis;
+  }
+}
+
+class _TicketClipper extends CustomClipper<Path> {
+  final double cornerRadius;
+  final double notchRadius;
+  final double notchPosition;
+
+  _TicketClipper({
+    required this.cornerRadius,
+    required this.notchRadius,
+    required this.notchPosition,
+  });
+
+  @override
+  Path getClip(Size size) {
+    final base = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(cornerRadius),
+        ),
+      );
+
+    final notchCenterY = size.height * notchPosition;
+    final notchLeft = Path()
+      ..addOval(
+        Rect.fromCircle(center: Offset(0, notchCenterY), radius: notchRadius),
+      );
+    final notchRight = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(size.width, notchCenterY),
+          radius: notchRadius,
+        ),
+      );
+
+    return Path.combine(
+      PathOperation.difference,
+      base,
+      Path.combine(PathOperation.union, notchLeft, notchRight),
+    );
+  }
+
+  @override
+  bool shouldReclip(covariant _TicketClipper oldClipper) {
+    return cornerRadius != oldClipper.cornerRadius ||
+        notchRadius != oldClipper.notchRadius ||
+        notchPosition != oldClipper.notchPosition;
+  }
+}
+
+class _TicketBorderPainter extends CustomPainter {
+  final _TicketClipper clipper;
+  final Color color;
+
+  _TicketBorderPainter({required this.clipper, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1;
+    final path = clipper.getClip(size);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TicketBorderPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.clipper != clipper;
   }
 }
