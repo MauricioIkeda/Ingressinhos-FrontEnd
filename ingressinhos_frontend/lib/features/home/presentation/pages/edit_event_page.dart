@@ -40,6 +40,7 @@ class _EditEventPageState extends State<EditEventPage> {
   late final DateTime _previewFallbackDate;
   List<LocationModel> locations = [];
   bool isLoadingLocations = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -65,16 +66,16 @@ class _EditEventPageState extends State<EditEventPage> {
     descriptionController.text = event.description ?? '';
     imageUrlController.text = event.imageUrl ?? '';
     if (event.baseTicketPrice != null) {
-      baseTicketPriceController.text =
-          event.baseTicketPrice!.toStringAsFixed(2);
+      baseTicketPriceController.text = event.baseTicketPrice!.toStringAsFixed(
+        2,
+      );
     }
     if (event.premiumTicketPrice != null) {
-      premiumTicketPriceController.text =
-          event.premiumTicketPrice!.toStringAsFixed(2);
+      premiumTicketPriceController.text = event.premiumTicketPrice!
+          .toStringAsFixed(2);
     }
     if (event.vipTicketPrice != null) {
-      vipTicketPriceController.text =
-          event.vipTicketPrice!.toStringAsFixed(2);
+      vipTicketPriceController.text = event.vipTicketPrice!.toStringAsFixed(2);
     }
 
     startDate = event.startTime;
@@ -86,7 +87,9 @@ class _EditEventPageState extends State<EditEventPage> {
   }
 
   Future<void> _loadLocations() async {
-    final result = await context.read<EventsCubit>().loadLocations();
+    final eventsCubit = context.read<EventsCubit>();
+    final result = await eventsCubit.loadLocations();
+    if (!mounted) return;
     setState(() {
       locations = result;
       isLoadingLocations = false;
@@ -94,19 +97,25 @@ class _EditEventPageState extends State<EditEventPage> {
   }
 
   Future<void> _selectDateTime(bool isStart) async {
+    final current = isStart ? startDate : endDate;
+    final now = DateTime.now();
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: current ?? now,
+      firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (date == null) return;
+    if (!mounted) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: current != null
+          ? TimeOfDay.fromDateTime(current)
+          : TimeOfDay.fromDateTime(now),
     );
     if (time == null) return;
+    if (!mounted) return;
 
     final dateTime = DateTime(
       date.year,
@@ -126,19 +135,25 @@ class _EditEventPageState extends State<EditEventPage> {
   }
 
   Future<void> _selectDateTimeSales(bool isStart) async {
+    final current = isStart ? salesStartsAt : salesEndsAt;
+    final now = DateTime.now();
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: current ?? now,
+      firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (date == null) return;
+    if (!mounted) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: current != null
+          ? TimeOfDay.fromDateTime(current)
+          : TimeOfDay.fromDateTime(now),
     );
     if (time == null) return;
+    if (!mounted) return;
 
     final dateTime = DateTime(
       date.year,
@@ -157,6 +172,10 @@ class _EditEventPageState extends State<EditEventPage> {
     });
   }
 
+  double? _parseMoney(String value) {
+    return double.tryParse(value.trim().replaceAll(',', '.'));
+  }
+
   Future<void> _submit() async {
     final eventId = widget.event.id;
     if (eventId == null) {
@@ -170,6 +189,7 @@ class _EditEventPageState extends State<EditEventPage> {
         selectedLocationId != null) {
       final event = EventModel(
         id: eventId,
+        ticketId: widget.event.ticketId,
         name: nameController.text.trim(),
         startTime: startDate!,
         endTime: endDate!,
@@ -181,11 +201,10 @@ class _EditEventPageState extends State<EditEventPage> {
         imageUrl: imageUrlController.text.trim().isEmpty
             ? null
             : imageUrlController.text.trim(),
-        baseTicketPrice: double.tryParse(baseTicketPriceController.text.trim()),
-        premiumTicketPrice: double.tryParse(
-          premiumTicketPriceController.text.trim(),
-        ),
-        vipTicketPrice: double.tryParse(vipTicketPriceController.text.trim()),
+        baseTicketPrice: _parseMoney(baseTicketPriceController.text),
+        premiumTicketPrice: _parseMoney(premiumTicketPriceController.text),
+        vipTicketPrice: _parseMoney(vipTicketPriceController.text),
+        isActive: widget.event.isActive ?? true,
         salesStartsAt: salesStartsAt,
         salesEndsAt: salesEndsAt,
       );
@@ -193,52 +212,6 @@ class _EditEventPageState extends State<EditEventPage> {
       context.read<EventsCubit>().updateEvent(eventId, event);
     } else {
       showErrorSnackBar(context, 'Preencha todos os campos obrigatorios', true);
-    }
-  }
-
-  Future<void> _confirmDelete() async {
-    final eventId = widget.event.id;
-    if (eventId == null) return;
-
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surfaceColor,
-        title: Text(
-          'Apagar evento',
-          style: GoogleFonts.poppins(
-            color: AppColors.primaryText,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          'Tem certeza que deseja apagar este evento?',
-          style: GoogleFonts.poppins(color: AppColors.secondaryText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancelar',
-              style: GoogleFonts.poppins(color: AppColors.secondaryText),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'Apagar',
-              style: GoogleFonts.poppins(
-                color: AppColors.errorColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldDelete == true) {
-      context.read<EventsCubit>().deleteEvent(eventId);
     }
   }
 
@@ -263,13 +236,13 @@ class _EditEventPageState extends State<EditEventPage> {
           : 'Adicione uma descricao para deixar o evento mais atrativo.',
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
       baseTicketPrice: baseTicketPriceController.text.trim().isNotEmpty
-          ? double.tryParse(baseTicketPriceController.text.trim())
+          ? _parseMoney(baseTicketPriceController.text)
           : null,
       premiumTicketPrice: premiumTicketPriceController.text.trim().isNotEmpty
-          ? double.tryParse(premiumTicketPriceController.text.trim())
+          ? _parseMoney(premiumTicketPriceController.text)
           : null,
       vipTicketPrice: vipTicketPriceController.text.trim().isNotEmpty
-          ? double.tryParse(vipTicketPriceController.text.trim())
+          ? _parseMoney(vipTicketPriceController.text)
           : null,
     );
   }
@@ -296,16 +269,17 @@ class _EditEventPageState extends State<EditEventPage> {
       body: BlocListener<EventsCubit, EventsState>(
         listener: (context, state) {
           if (state is EventsUpdated) {
+            setState(() => _isSaving = false);
             showErrorSnackBar(context, 'Evento atualizado com sucesso', false);
             Navigator.pop(context, true);
           }
 
-          if (state is EventsDeleted) {
-            showErrorSnackBar(context, 'Evento apagado', false);
-            Navigator.pop(context, true);
+          if (state is EventUpdating) {
+            setState(() => _isSaving = true);
           }
 
           if (state is EventsError) {
+            setState(() => _isSaving = false);
             showErrorSnackBar(context, state.message, true);
           }
         },
@@ -456,7 +430,7 @@ class _EditEventPageState extends State<EditEventPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submit,
+                  onPressed: _isSaving ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     foregroundColor: AppColors.primaryText,
@@ -465,36 +439,22 @@ class _EditEventPageState extends State<EditEventPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    'Salvar alteracoes',
-                    style: GoogleFonts.poppins(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _confirmDelete,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.errorColor,
-                    side: BorderSide(color: AppColors.errorColor),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  icon: const Icon(Icons.delete_forever_rounded),
-                  label: Text(
-                    'Apagar evento',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Salvar alteracoes',
+                          style: GoogleFonts.poppins(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -567,7 +527,7 @@ class _EditEventPageState extends State<EditEventPage> {
     }
 
     return DropdownButtonFormField<int>(
-      value: selectedLocationId,
+      initialValue: selectedLocationId,
       isExpanded: true,
       decoration: _inputDecoration(
         'Localizacao (obrigatorio)',
@@ -603,9 +563,9 @@ class _EditEventPageState extends State<EditEventPage> {
       child: SwitchListTile.adaptive(
         value: hasSeats,
         onChanged: null,
-        activeColor: AppColors.primaryColor,
+        activeThumbColor: AppColors.primaryColor,
         title: Text(
-          'Evento com assentos (COMING SOON)',
+          'Assentos numerados',
           style: GoogleFonts.poppins(
             color: AppColors.primaryText,
             fontWeight: FontWeight.w600,
@@ -669,8 +629,8 @@ class _EditEventPageState extends State<EditEventPage> {
             text: selectedDate == null
                 ? ''
                 : '${selectedDate.day.toString().padLeft(2, '0')}/'
-                    '${selectedDate.month.toString().padLeft(2, '0')}/'
-                    '${selectedDate.year} ${selectedDate.hour.toString().padLeft(2, '0')}:${selectedDate.minute.toString().padLeft(2, '0')}',
+                      '${selectedDate.month.toString().padLeft(2, '0')}/'
+                      '${selectedDate.year} ${selectedDate.hour.toString().padLeft(2, '0')}:${selectedDate.minute.toString().padLeft(2, '0')}',
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {

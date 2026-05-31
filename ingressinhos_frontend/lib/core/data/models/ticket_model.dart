@@ -3,8 +3,8 @@ class TicketModel {
   final int eventId;
   final String name;
   final double basePrice;
-  final double premiumPrice;
-  final double vipPrice;
+  final double? premiumPrice;
+  final double? vipPrice;
   final DateTime salesStartsAt;
   final DateTime salesEndsAt;
   final bool isActive;
@@ -22,13 +22,19 @@ class TicketModel {
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
+    double? parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+      return double.tryParse(value.toString().replaceAll(',', '.'));
+    }
+
     return TicketModel(
       ticketId: json['ticketId'],
       eventId: json['eventId'],
       name: json['name'],
-      basePrice: json['basePrice'].toDouble(),
-      premiumPrice: json['premiumPrice'].toDouble(),
-      vipPrice: json['vipPrice'].toDouble(),
+      basePrice: parseDouble(json['basePrice']) ?? 0,
+      premiumPrice: parseDouble(json['premiumPrice']),
+      vipPrice: parseDouble(json['vipPrice']),
       salesStartsAt: DateTime.parse(json['salesStartsAt']),
       salesEndsAt: DateTime.parse(json['salesEndsAt']),
       isActive: json['isActive'],

@@ -17,6 +17,27 @@ class IssuedTicketsCubit extends Cubit<IssuedTicketsState> {
     : _issuedTicketsRepository = issuedTicketsRepository,
       super(const IssuedTicketsInitial());
 
+  String _ticketKey(IssuedTicketModel ticket) {
+    final id = ticket.issuedTicketId;
+    if (id != null) return 'id:$id';
+    return 'access:${ticket.accessCode}';
+  }
+
+  int _appendUniqueTickets(List<IssuedTicketModel> tickets) {
+    final existingKeys = _tickets.map(_ticketKey).toSet();
+    var added = 0;
+
+    for (final ticket in tickets) {
+      final key = _ticketKey(ticket);
+      if (existingKeys.add(key)) {
+        _tickets.add(ticket);
+        added++;
+      }
+    }
+
+    return added;
+  }
+
   Future<void> loadTickets({bool reset = false}) async {
     if (reset) {
       _tickets.clear();
@@ -32,15 +53,16 @@ class IssuedTicketsCubit extends Cubit<IssuedTicketsState> {
         top: _pageSize,
         orderBy: _orderBy,
       );
-      _tickets
-        ..clear()
-        ..addAll(tickets);
+      _tickets.clear();
+      _appendUniqueTickets(tickets);
       _skip = _tickets.length;
       _hasMore = tickets.length == _pageSize;
-      emit(IssuedTicketsLoaded(
-        List<IssuedTicketModel>.from(_tickets),
-        hasMore: _hasMore,
-      ));
+      emit(
+        IssuedTicketsLoaded(
+          List<IssuedTicketModel>.from(_tickets),
+          hasMore: _hasMore,
+        ),
+      );
     } on IngressinhosException catch (e) {
       emit(IssuedTicketsError(e.message));
     } catch (e) {
@@ -51,11 +73,13 @@ class IssuedTicketsCubit extends Cubit<IssuedTicketsState> {
   Future<void> loadMoreTickets() async {
     if (_isLoadingMore || !_hasMore) return;
     _isLoadingMore = true;
-    emit(IssuedTicketsLoaded(
-      List<IssuedTicketModel>.from(_tickets),
-      hasMore: _hasMore,
-      isLoadingMore: true,
-    ));
+    emit(
+      IssuedTicketsLoaded(
+        List<IssuedTicketModel>.from(_tickets),
+        hasMore: _hasMore,
+        isLoadingMore: true,
+      ),
+    );
 
     try {
       final tickets = await _issuedTicketsRepository.getIssuedTickets(
@@ -63,24 +87,28 @@ class IssuedTicketsCubit extends Cubit<IssuedTicketsState> {
         top: _pageSize,
         orderBy: _orderBy,
       );
-      _tickets.addAll(tickets);
+      final added = _appendUniqueTickets(tickets);
       _skip = _tickets.length;
-      _hasMore = tickets.length == _pageSize;
+      _hasMore = tickets.length == _pageSize && added > 0;
     } catch (_) {
       _isLoadingMore = false;
-      emit(IssuedTicketsLoaded(
-        List<IssuedTicketModel>.from(_tickets),
-        hasMore: _hasMore,
-        isLoadingMore: false,
-      ));
+      emit(
+        IssuedTicketsLoaded(
+          List<IssuedTicketModel>.from(_tickets),
+          hasMore: _hasMore,
+          isLoadingMore: false,
+        ),
+      );
       return;
     }
 
     _isLoadingMore = false;
-    emit(IssuedTicketsLoaded(
-      List<IssuedTicketModel>.from(_tickets),
-      hasMore: _hasMore,
-      isLoadingMore: false,
-    ));
+    emit(
+      IssuedTicketsLoaded(
+        List<IssuedTicketModel>.from(_tickets),
+        hasMore: _hasMore,
+        isLoadingMore: false,
+      ),
+    );
   }
 }

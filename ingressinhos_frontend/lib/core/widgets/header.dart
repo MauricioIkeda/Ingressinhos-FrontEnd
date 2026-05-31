@@ -73,7 +73,8 @@ class IngressinhosDrawer extends StatelessWidget {
                 future: storage.getUserFromToken(),
                 builder: (context, snapshot) {
                   final user = snapshot.data;
-                  final isSeller = user?.role == 'Seller';
+                  final role = user?.role.toLowerCase();
+                  final isSeller = role == 'seller';
 
                   return ListView(
                     padding: EdgeInsets.zero,
@@ -102,14 +103,10 @@ class IngressinhosDrawer extends StatelessWidget {
                         ),
                       ),
 
-                      _buildMenuItem(
-                        Icons.home,
-                        'Home',
-                        () {
-                          Navigator.pop(context);
-                          Navigator.pushReplacementNamed(context, '/home');
-                        },
-                      ),
+                      _buildMenuItem(Icons.home, 'Home', () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(context, '/home');
+                      }),
                       _buildMenuItem(
                         Icons.confirmation_num_sharp,
                         'Meus Ingressos',
@@ -130,14 +127,10 @@ class IngressinhosDrawer extends StatelessWidget {
                         ),
 
                       if (isSeller)
-                        _buildMenuItem(
-                          Icons.edit_rounded,
-                          'Editar Evento',
-                          () {
-                            Navigator.pop(context);
-                            Navigator.pushNamed(context, '/seller-events');
-                          },
-                        ),
+                        _buildMenuItem(Icons.edit_rounded, 'Editar Evento', () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/seller-events');
+                        }),
 
                       _buildMenuItem(
                         Icons.settings,
@@ -151,7 +144,11 @@ class IngressinhosDrawer extends StatelessWidget {
             ),
 
             const Divider(color: Colors.grey, height: 1),
-            _buildMenuItem(Icons.exit_to_app, 'Deslogar', () => onLogout?.call()),
+            _buildMenuItem(
+              Icons.exit_to_app,
+              'Deslogar',
+              () => onLogout?.call(),
+            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -187,15 +184,17 @@ class IngressinhosDrawer extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
-              color: role == 'Seller'
-                  ? Colors.orange.withOpacity(0.25)
-                  : Colors.blue.withOpacity(0.25),
+              color: role.toLowerCase() == 'seller'
+                  ? Colors.orange.withValues(alpha: 0.25)
+                  : Colors.blue.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               role,
               style: GoogleFonts.poppins(
-                color: role == 'Seller' ? Colors.orange[700] : Colors.blue[700],
+                color: role.toLowerCase() == 'seller'
+                    ? Colors.orange[700]
+                    : Colors.blue[700],
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),

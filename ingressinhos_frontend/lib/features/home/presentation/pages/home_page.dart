@@ -19,10 +19,6 @@ class HomePage extends StatelessWidget {
         if (state is AuthError) {
           showErrorSnackBar(context, state.message, true);
         }
-
-        if (state is AuthUnauthenticated) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
       },
       child: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
@@ -31,8 +27,9 @@ class HomePage extends StatelessWidget {
             appBar: const IngressinhosAppBar(),
             drawer: IngressinhosDrawer(
               onLogout: () {
+                final authCubit = context.read<AuthCubit>();
                 Navigator.pop(context);
-                context.read<AuthCubit>().logout();
+                authCubit.logout();
               },
             ),
             body: Column(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/auth_gate.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/register_client_page.dart';
@@ -22,6 +23,8 @@ void main() {
   runApp(const MainApp());
 }
 
+final appNavigatorKey = GlobalKey<NavigatorState>();
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -33,13 +36,9 @@ class MainApp extends StatelessWidget {
           create: (_) => getIt<AuthCubit>()..checkAuthentication(),
         ),
 
-        BlocProvider<EventsCubit>(
-          create: (_) => getIt<EventsCubit>(),
-        ),
+        BlocProvider<EventsCubit>(create: (_) => getIt<EventsCubit>()),
 
-        BlocProvider<CartCubit>(
-          create: (_) => getIt<CartCubit>(),
-        ),
+        BlocProvider<CartCubit>(create: (_) => getIt<CartCubit>()),
 
         BlocProvider<IssuedTicketsCubit>(
           create: (_) => getIt<IssuedTicketsCubit>(),
@@ -49,19 +48,26 @@ class MainApp extends StatelessWidget {
           create: (_) => getIt<SellerEventsCubit>(),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: AuthGate(),
-        routes: {
-          '/login': (context) => LoginPage(),
-          '/registerclient': (context) => RegisterClientPage(),
-          '/registerseller': (context) => RegisterSellerPage(),
-          '/registerevent': (context) => RegisterEventPage(),
-          '/home': (context) => HomePage(),
-          '/cart': (context) => CartPage(),
-          '/mytickets': (context) => MyTicketsPage(),
-          '/seller-events': (context) => SellerEventsPage(),
+      child: BlocListener<AuthCubit, AuthState>(
+        listenWhen: (_, state) => state is AuthUnauthenticated,
+        listener: (_, _) {
+          appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
         },
+        child: MaterialApp(
+          navigatorKey: appNavigatorKey,
+          debugShowCheckedModeBanner: false,
+          home: AuthGate(),
+          routes: {
+            '/login': (context) => LoginPage(),
+            '/registerclient': (context) => RegisterClientPage(),
+            '/registerseller': (context) => RegisterSellerPage(),
+            '/registerevent': (context) => RegisterEventPage(),
+            '/home': (context) => HomePage(),
+            '/cart': (context) => CartPage(),
+            '/mytickets': (context) => MyTicketsPage(),
+            '/seller-events': (context) => SellerEventsPage(),
+          },
+        ),
       ),
     );
   }

@@ -79,10 +79,9 @@ class _SellerEventsPageState extends State<SellerEventsPage> {
                     ),
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
-                      onPressed: () =>
-                          context.read<SellerEventsCubit>().loadEvents(
-                            reset: true,
-                          ),
+                      onPressed: () => context
+                          .read<SellerEventsCubit>()
+                          .loadEvents(reset: true),
                       icon: const Icon(Icons.refresh),
                       label: Text(
                         'Tentar novamente',
@@ -136,11 +135,15 @@ class _SellerEventsPageState extends State<SellerEventsPage> {
                     final event = state.events[index];
                     return EventCard(
                       event: event,
-                      onTap: () {
-                        Navigator.of(context).push(
+                      onTap: () async {
+                        final changed = await Navigator.of(context).push<bool>(
                           MaterialPageRoute(
                             builder: (_) => EditEventPage(event: event),
                           ),
+                        );
+                        if (!context.mounted || changed != true) return;
+                        context.read<SellerEventsCubit>().loadEvents(
+                          reset: true,
                         );
                       },
                     );

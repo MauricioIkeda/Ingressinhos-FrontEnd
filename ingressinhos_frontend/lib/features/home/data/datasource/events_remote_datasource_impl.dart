@@ -88,8 +88,10 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
         ticketId: 0,
         name: '${eventModel.name} - Ingresso',
         basePrice: eventModel.baseTicketPrice!,
-        premiumPrice: eventModel.premiumTicketPrice ?? 0,
-        vipPrice: eventModel.vipTicketPrice ?? 0,
+        premiumPrice: eventModel.hasSeats
+            ? eventModel.premiumTicketPrice
+            : null,
+        vipPrice: eventModel.hasSeats ? eventModel.vipTicketPrice : null,
         salesStartsAt: eventModel.salesStartsAt!,
         salesEndsAt: eventModel.salesEndsAt!,
         isActive: eventModel.isActive ?? true,
@@ -103,7 +105,7 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
       throw IngressinhosException(mapDioError(e, 'Erro ao criar evento'));
     } catch (e) {
       throw IngressinhosException(
-        'Erro do front burro cansado por algum motivo: ${e.toString()}',
+        'Erro ao preparar os dados do evento: ${e.toString()}',
       );
     }
   }
@@ -114,6 +116,27 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
       final payload = eventModel.toJson();
       payload['eventId'] = eventId;
       await _ingressinhosClient.dio.put(Endpoints.eventos, data: payload);
+
+      if (eventModel.ticketId != null && eventModel.baseTicketPrice != null) {
+        final ticket = TicketModel(
+          ticketId: eventModel.ticketId!,
+          eventId: eventId,
+          name: '${eventModel.name} - Ingresso',
+          basePrice: eventModel.baseTicketPrice!,
+          premiumPrice: eventModel.hasSeats
+              ? eventModel.premiumTicketPrice
+              : null,
+          vipPrice: eventModel.hasSeats ? eventModel.vipTicketPrice : null,
+          salesStartsAt: eventModel.salesStartsAt ?? eventModel.startTime,
+          salesEndsAt: eventModel.salesEndsAt ?? eventModel.endTime,
+          isActive: eventModel.isActive ?? true,
+        );
+
+        await _ingressinhosClient.dio.put(
+          Endpoints.tickets,
+          data: ticket.toJson(),
+        );
+      }
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao atualizar evento'));
     }

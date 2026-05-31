@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
+import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
+import 'package:ingressinhos_frontend/core/storage/secure_storage_service.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
@@ -23,6 +25,13 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   int _baseQuantity = 0;
   int _premiumQuantity = 0;
   int _vipQuantity = 0;
+  late final Future<bool> _canEditFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _canEditFuture = _canEditEvent();
+  }
 
   int get _totalTickets => _baseQuantity + _premiumQuantity + _vipQuantity;
 
@@ -31,6 +40,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     return (_baseQuantity * (event.baseTicketPrice ?? 0)) +
         (_premiumQuantity * (event.premiumTicketPrice ?? 0)) +
         (_vipQuantity * (event.vipTicketPrice ?? 0));
+  }
+
+  Future<bool> _canEditEvent() async {
+    try {
+      final user = await getIt<SecureStorageService>().getUserFromToken();
+      final role = user.role.toLowerCase();
+      return role == 'seller' || role == 'admin';
+    } catch (_) {
+      return false;
+    }
   }
 
   String _formatCurrency(double value) {
@@ -93,11 +112,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
     try {
       await context.read<CartCubit>().addTickets(
-            event: widget.event,
-            baseQuantity: _baseQuantity,
-            premiumQuantity: _premiumQuantity,
-            vipQuantity: _vipQuantity,
-          );
+        event: widget.event,
+        baseQuantity: _baseQuantity,
+        premiumQuantity: _premiumQuantity,
+        vipQuantity: _vipQuantity,
+      );
     } on IngressinhosException catch (e) {
       if (!mounted) return;
       showErrorSnackBar(context, e.message, true);
@@ -191,7 +210,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StatusBadge(isAvailable: event.availableTickets != null && event.availableTickets! > 0),
+                        _StatusBadge(
+                          isAvailable:
+                              event.availableTickets != null &&
+                              event.availableTickets! > 0,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           title,
@@ -295,7 +318,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     onDecrement: () => _decrementQuantity(TicketType.base),
                   ),
                   if (event.premiumTicketPrice != null &&
-                      event.premiumTicketPrice! > 0.0 && event.hasSeats) ...[
+                      event.premiumTicketPrice! > 0.0 &&
+                      event.hasSeats) ...[
                     const SizedBox(height: 12),
                     _TicketTypeSelector(
                       label: 'Premium',
@@ -309,7 +333,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     ),
                   ],
                   if (event.vipTicketPrice != null &&
-                      event.vipTicketPrice! > 0.0 && event.hasSeats) ...[
+                      event.vipTicketPrice! > 0.0 &&
+                      event.hasSeats) ...[
                     const SizedBox(height: 12),
                     _TicketTypeSelector(
                       label: 'VIP',
@@ -405,37 +430,51 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 ),
               ),
             ),
-            if (event.id != null) ...[
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => EditEventPage(event: event),
+            FutureBuilder<bool>(
+              future: _canEditFuture,
+              builder: (context, snapshot) {
+                if (event.id == null || snapshot.data != true) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final changed = await Navigator.of(context)
+                              .push<bool>(
+                                MaterialPageRoute(
+                                  builder: (_) => EditEventPage(event: event),
+                                ),
+                              );
+                          if (!context.mounted || changed != true) return;
+                          Navigator.of(context).pop(true);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryColor,
+                          side: BorderSide(color: AppColors.primaryColor),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.edit_rounded),
+                        label: Text(
+                          'Editar evento',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primaryColor,
-                    side: BorderSide(color: AppColors.primaryColor),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
                     ),
-                  ),
-                  icon: const Icon(Icons.edit_rounded),
-                  label: Text(
-                    'Editar evento',
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),

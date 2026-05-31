@@ -51,16 +51,38 @@ class EventModel {
       return int.tryParse(value.toString());
     }
 
+    double? parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+      return double.tryParse(value.toString().replaceAll(',', '.'));
+    }
+
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      return DateTime.tryParse(value.toString());
+    }
+
     int? extractedAvailableQuantity;
     int? extractedTicketId;
+    double? extractedBasePrice;
+    double? extractedPremiumPrice;
+    double? extractedVipPrice;
+    DateTime? extractedSalesStartsAt;
+    DateTime? extractedSalesEndsAt;
+    bool? extractedIsActive;
     if (json['tickets'] != null &&
         json['tickets'] is List &&
         (json['tickets'] as List).isNotEmpty) {
       final firstTicket = json['tickets'][0];
       if (firstTicket is Map<String, dynamic>) {
-        extractedAvailableQuantity =
-            parseInt(firstTicket['availableQuantity']);
+        extractedAvailableQuantity = parseInt(firstTicket['availableQuantity']);
         extractedTicketId = parseInt(firstTicket['id']);
+        extractedBasePrice = parseDouble(firstTicket['basePrice']);
+        extractedPremiumPrice = parseDouble(firstTicket['premiumPrice']);
+        extractedVipPrice = parseDouble(firstTicket['vipPrice']);
+        extractedSalesStartsAt = parseDate(firstTicket['salesStartsAt']);
+        extractedSalesEndsAt = parseDate(firstTicket['salesEndsAt']);
+        extractedIsActive = parseInt(firstTicket['status']) == 1;
       }
     }
 
@@ -78,16 +100,13 @@ class EventModel {
       description: json['description']?.toString(),
       imageUrl: json['imageUrl']?.toString(),
       sellerTradingName: json['sellerTradingName']?.toString(),
-      baseTicketPrice: json['basePrice'],
-      premiumTicketPrice: json['premiumPrice'],
-      vipTicketPrice: json['vipPrice'],
-      salesStartsAt: json['salesStartsAt'] != null
-          ? DateTime.parse(json['salesStartsAt'])
-          : null,
-      salesEndsAt: json['salesEndsAt'] != null
-          ? DateTime.parse(json['salesEndsAt'])
-          : null,
-      isActive: json['isActive'] as bool?,
+      baseTicketPrice: parseDouble(json['basePrice']) ?? extractedBasePrice,
+      premiumTicketPrice:
+          parseDouble(json['premiumPrice']) ?? extractedPremiumPrice,
+      vipTicketPrice: parseDouble(json['vipPrice']) ?? extractedVipPrice,
+      salesStartsAt: parseDate(json['salesStartsAt']) ?? extractedSalesStartsAt,
+      salesEndsAt: parseDate(json['salesEndsAt']) ?? extractedSalesEndsAt,
+      isActive: json['isActive'] as bool? ?? extractedIsActive,
       availableTickets: extractedAvailableQuantity,
     );
   }

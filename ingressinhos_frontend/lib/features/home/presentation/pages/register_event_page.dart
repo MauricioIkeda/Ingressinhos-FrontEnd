@@ -58,7 +58,9 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
   }
 
   Future<void> _loadLocations() async {
-    final result = await context.read<EventsCubit>().loadLocations();
+    final eventsCubit = context.read<EventsCubit>();
+    final result = await eventsCubit.loadLocations();
+    if (!mounted) return;
     setState(() {
       locations = result;
       isLoadingLocations = false;
@@ -73,12 +75,14 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       lastDate: DateTime(2100),
     );
     if (date == null) return;
+    if (!mounted) return;
 
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (time == null) return;
+    if (!mounted) return;
 
     final dateTime = DateTime(
       date.year,
@@ -105,12 +109,14 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       lastDate: DateTime(2100),
     );
     if (date == null) return;
+    if (!mounted) return;
 
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (time == null) return;
+    if (!mounted) return;
 
     final dateTime = DateTime(
       date.year,
@@ -127,6 +133,10 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
         salesEndsAt = dateTime;
       }
     });
+  }
+
+  double? _parseMoney(String value) {
+    return double.tryParse(value.trim().replaceAll(',', '.'));
   }
 
   void _submit() {
@@ -146,11 +156,9 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
         imageUrl: imageUrlController.text.trim().isEmpty
             ? null
             : imageUrlController.text.trim(),
-        baseTicketPrice: double.tryParse(baseTicketPriceController.text.trim()),
-        premiumTicketPrice: double.tryParse(
-          premiumTicketPriceController.text.trim(),
-        ),
-        vipTicketPrice: double.tryParse(vipTicketPriceController.text.trim()),
+        baseTicketPrice: _parseMoney(baseTicketPriceController.text),
+        premiumTicketPrice: _parseMoney(premiumTicketPriceController.text),
+        vipTicketPrice: _parseMoney(vipTicketPriceController.text),
         salesStartsAt: salesStartsAt,
         salesEndsAt: salesEndsAt,
       );
@@ -182,13 +190,13 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
           : 'Adicione uma descrição para deixar o evento mais atrativo.',
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
       baseTicketPrice: baseTicketPriceController.text.trim().isNotEmpty
-          ? double.tryParse(baseTicketPriceController.text.trim())
+          ? _parseMoney(baseTicketPriceController.text)
           : null,
       premiumTicketPrice: premiumTicketPriceController.text.trim().isNotEmpty
-          ? double.tryParse(premiumTicketPriceController.text.trim())
+          ? _parseMoney(premiumTicketPriceController.text)
           : null,
       vipTicketPrice: vipTicketPriceController.text.trim().isNotEmpty
-          ? double.tryParse(vipTicketPriceController.text.trim())
+          ? _parseMoney(vipTicketPriceController.text)
           : null,
     );
   }
@@ -460,7 +468,7 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
     }
 
     return DropdownButtonFormField<int>(
-      value: selectedLocationId,
+      initialValue: selectedLocationId,
       isExpanded: true,
       decoration: _inputDecoration(
         'Localização (obrigatório)',
@@ -496,9 +504,9 @@ class _RegisterEventPageState extends State<RegisterEventPage> {
       child: SwitchListTile.adaptive(
         value: hasSeats,
         onChanged: null, //(val) => setState(() => hasSeats = val),
-        activeColor: AppColors.primaryColor,
+        activeThumbColor: AppColors.primaryColor,
         title: Text(
-          'Evento com assentos (COMING SOON)',
+          'Assentos numerados',
           style: GoogleFonts.poppins(
             color: AppColors.primaryText,
             fontWeight: FontWeight.w600,

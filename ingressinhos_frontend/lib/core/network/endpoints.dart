@@ -1,29 +1,23 @@
-import 'dart:io';
-
 class Endpoints {
-  // Android = 10.0.2.2
-  // iOS/macOS/web/desktop = localhost
-  static String get baseHost {
-    if (Platform.isAndroid) {
-      return '10.0.2.2';
-    }
-    return 'localhost';
-  }
+  static const _defaultIngressinhosBaseUrl =
+      'https://ingressinhos.seu-dominio.com.br';
+  static const _defaultAuthBaseUrl = 'https://auth-api.seu-dominio.com.br';
+  static const _defaultSentinelAuthFrontendUrl =
+      'https://auth.seu-dominio.com.br';
 
-  // APIs expostas pelo docker-compose
   static String get ingressinhosBaseUrl {
     const configured = String.fromEnvironment('INGRESSINHOS_API_BASE_URL');
-    return configured.isNotEmpty ? configured : 'http://$baseHost:5202';
+    return configured.isNotEmpty ? configured : _defaultIngressinhosBaseUrl;
   }
 
   static String get authBaseUrl {
     const configured = String.fromEnvironment('SENTINEL_AUTH_API_BASE_URL');
-    return configured.isNotEmpty ? configured : 'http://$baseHost:5254';
+    return configured.isNotEmpty ? configured : _defaultAuthBaseUrl;
   }
 
   static String get sentinelAuthFrontendUrl {
     const configured = String.fromEnvironment('SENTINEL_AUTH_FRONTEND_URL');
-    return configured.isNotEmpty ? configured : 'http://$baseHost:5173';
+    return configured.isNotEmpty ? configured : _defaultSentinelAuthFrontendUrl;
   }
 
   static const authClientRegister = '/api/clients'; // Para cadastrar usuarios
