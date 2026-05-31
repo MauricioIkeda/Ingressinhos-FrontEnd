@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
         }
 
         if (state is AuthUnauthenticated) {
-          Navigator.pushReplacementNamed(context, '/login');
+          Navigator.of(context).popUntil((route) => route.isFirst);
         }
       },
       child: BlocBuilder<AuthCubit, AuthState>(
@@ -56,8 +56,8 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                
-                Expanded(child: ListEventPage(),)
+
+                Expanded(child: ListEventPage()),
               ],
             ),
           );

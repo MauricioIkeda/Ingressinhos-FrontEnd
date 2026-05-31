@@ -24,18 +24,31 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         data: {
           'email': email,
           'password': password,
-          'clientId': 'ingressinhos-api',
-          'redirectUri': 'ingressinhos://auth/callback',
+          'clientId': Endpoints.authClientId,
+          'redirectUri': Endpoints.authRedirectUri,
           'state': 'ingressinhos',
         },
       );
 
+      return exchangeAuthorizationCode(
+        code: authorizeResponse.data['code'],
+      );
+    } on DioException catch (e) {
+      throw AuthException(mapDioError(e, 'Erro ao fazer login'));
+    }
+  }
+
+  @override
+  Future<AuthTokens> exchangeAuthorizationCode({
+    required String code,
+  }) async {
+    try {
       final tokenResponse = await _authDioClient.dio.post(
         Endpoints.authToken,
         data: {
-          'code': authorizeResponse.data['code'],
-          'clientId': 'ingressinhos-api',
-          'redirectUri': 'ingressinhos://auth/callback',
+          'code': code,
+          'clientId': Endpoints.authClientId,
+          'redirectUri': Endpoints.authRedirectUri,
         },
       );
 
@@ -44,7 +57,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         refreshToken: tokenResponse.data['refreshToken'],
       );
     } on DioException catch (e) {
-      throw AuthException(mapDioError(e, 'Erro ao fazer login'));
+      throw AuthException(mapDioError(e, 'Erro ao finalizar login'));
     }
   }
 

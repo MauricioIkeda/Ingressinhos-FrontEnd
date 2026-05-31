@@ -44,9 +44,31 @@ class AuthGate extends StatelessWidget {
           return const ProfileGate();
         }
 
-        if (state is AuthUnauthenticated ||
-            state is AuthError ||
-            state is AuthLoading) {
+        if (state is AuthLoading) {
+          return IngressinhosScaffold(
+            backgroundColor: AppColors.backgroundColor,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    color: AppColors.primaryColor,
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Finalizando login...',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.secondaryText,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (state is AuthUnauthenticated || state is AuthError) {
           return const LoginPage();
         }
 

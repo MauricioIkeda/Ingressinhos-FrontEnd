@@ -47,6 +47,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> completeOAuthLogin({required String code}) async {
+    final tokens = await remoteDatasource.exchangeAuthorizationCode(code: code);
+
+    await storage.saveToken(token: tokens.token, refreshToken: tokens.refreshToken);
+  }
+
+  @override
   Future<void> logout() async {
     await storage.clearTokens();
   }

@@ -13,6 +13,7 @@ class Endpoints {
   // APIs expostas pelo docker-compose
   static String get ingressinhosBaseUrl => 'http://$baseHost:5202';
   static String get authBaseUrl => 'http://$baseHost:5254';
+  static String get sentinelAuthFrontendUrl => 'http://$baseHost:5173';
 
   static const authClientRegister = '/api/clients'; // Para cadastrar usuarios
   static const authSellerRegister = '/api/sellers'; // Para cadastrar vendedores
@@ -22,6 +23,8 @@ class Endpoints {
       '/api/User/refresh'; // Para dar refresh no token que esta vencido
   static const authAuthorize = '/api/oauth/authorize';
   static const authToken = '/api/oauth/token';
+  static const authClientId = 'ingressinhos-api';
+  static const authRedirectUri = 'ingressinhos://auth/callback';
 
   // API Ingressinhos
   static const eventos = '/api/events'; // Para buscar eventos

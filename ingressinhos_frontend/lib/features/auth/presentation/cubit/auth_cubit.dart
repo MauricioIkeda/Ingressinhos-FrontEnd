@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/login_user_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/register_user_client_model.dart';
 import 'package:ingressinhos_frontend/features/auth/data/models/register_user_seller_model.dart';
@@ -70,6 +71,22 @@ class AuthCubit extends Cubit<AuthState> {
       );
       emit(AuthAuthenticated());
     } catch (e) {
+      emit(AuthError(_mapError(e)));
+    }
+  }
+
+  Future<void> completeOAuthLogin({required String code}) async {
+    debugPrint('[OAuth] AuthCubit.completeOAuthLogin started.');
+    emit(AuthLoading());
+
+    try {
+      await authRepository
+          .completeOAuthLogin(code: code)
+          .timeout(const Duration(seconds: 12));
+      debugPrint('[OAuth] Authorization code exchanged. User authenticated.');
+      emit(AuthAuthenticated());
+    } catch (e) {
+      debugPrint('[OAuth] Authorization code exchange failed: $e');
       emit(AuthError(_mapError(e)));
     }
   }

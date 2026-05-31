@@ -5,6 +5,7 @@ import 'package:ingressinhos_frontend/core/data/models/user_model.dart';
 
 class SecureStorageService {
   final storage = const FlutterSecureStorage();
+  static const _oauthStateKey = 'oauth_state';
 
   Future<void> saveToken({
     required String token,
@@ -21,6 +22,18 @@ class SecureStorageService {
 
   Future<String?> getRefreshToken() async {
     return await storage.read(key: "refresh_token");
+  }
+
+  Future<void> saveOAuthState(String state) async {
+    await storage.write(key: _oauthStateKey, value: state);
+  }
+
+  Future<String?> getOAuthState() async {
+    return await storage.read(key: _oauthStateKey);
+  }
+
+  Future<void> clearOAuthState() async {
+    await storage.delete(key: _oauthStateKey);
   }
 
   Map<String, dynamic> _parseJwtPayload(String token) {
@@ -40,7 +53,8 @@ class SecureStorageService {
     try {
       final payload = _parseJwtPayload(token);
 
-      final sellerId = payload['sellerId'] as int?;
+      final sellerIdClaim = payload['sellerId'];
+      final sellerId = sellerIdClaim is num ? sellerIdClaim.toInt() : null;
       final name = (payload['name'] ?? payload['unique_name']) as String?;
       final roleClaim =
           payload['role'] ??
@@ -49,14 +63,30 @@ class SecureStorageService {
           ? (roleClaim.isEmpty ? null : roleClaim.first.toString())
           : roleClaim?.toString();
 
-      if (name == null || role == null) {
+      if (name == null) {
         throw Exception('Dados do usuário inválidos');
       }
 
-      return UserModel(name: name, role: role, sellerId: sellerId);
+      return UserModel(name: name, role: role ?? '', sellerId: sellerId);
     } catch (_) {
       throw Exception('Erro ao processar token');
     }
+  }
+
+  Future<({String? name, String? email})> getIdentityFromToken() async {
+    final token = await getToken();
+    if (token == null) {
+      return (name: null, email: null);
+    }
+
+    final payload = _parseJwtPayload(token);
+    final name = (payload['name'] ?? payload['unique_name'])?.toString();
+    final email =
+        (payload['email'] ??
+                payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'])
+            ?.toString();
+
+    return (name: name, email: email);
   }
 
   Future<void> clearTokens() async {

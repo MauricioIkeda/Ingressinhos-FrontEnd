@@ -21,6 +21,10 @@ abstract class AuthRemoteDatasource {
     required String password,
   });
 
+  Future<AuthTokens> exchangeAuthorizationCode({
+    required String code,
+  });
+
   Future<AuthTokens> refreshToken({
     required String token,
     required String refreshToken,

@@ -21,6 +21,10 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<void> completeOAuthLogin({
+    required String code,
+  });
+
   Future<AuthType> isLoggedIn();
 
   Future<void> logout();
