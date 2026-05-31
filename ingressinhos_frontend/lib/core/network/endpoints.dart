@@ -11,9 +11,20 @@ class Endpoints {
   }
 
   // APIs expostas pelo docker-compose
-  static String get ingressinhosBaseUrl => 'http://$baseHost:5202';
-  static String get authBaseUrl => 'http://$baseHost:5254';
-  static String get sentinelAuthFrontendUrl => 'http://$baseHost:5173';
+  static String get ingressinhosBaseUrl {
+    const configured = String.fromEnvironment('INGRESSINHOS_API_BASE_URL');
+    return configured.isNotEmpty ? configured : 'http://$baseHost:5202';
+  }
+
+  static String get authBaseUrl {
+    const configured = String.fromEnvironment('SENTINEL_AUTH_API_BASE_URL');
+    return configured.isNotEmpty ? configured : 'http://$baseHost:5254';
+  }
+
+  static String get sentinelAuthFrontendUrl {
+    const configured = String.fromEnvironment('SENTINEL_AUTH_FRONTEND_URL');
+    return configured.isNotEmpty ? configured : 'http://$baseHost:5173';
+  }
 
   static const authClientRegister = '/api/clients'; // Para cadastrar usuarios
   static const authSellerRegister = '/api/sellers'; // Para cadastrar vendedores
