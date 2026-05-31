@@ -41,10 +41,17 @@ class SecureStorageService {
       final payload = _parseJwtPayload(token);
 
       final sellerId = payload['sellerId'] as int?;
-      final name = payload['unique_name'] as String?;
-      final role = payload['role'] as String?;
+      final name = (payload['name'] ?? payload['unique_name']) as String?;
+      final roleClaim =
+          payload['role'] ??
+          payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      final role = roleClaim is List
+          ? (roleClaim.isEmpty ? null : roleClaim.first.toString())
+          : roleClaim?.toString();
 
-      if (name == null || role == null) throw Exception('Dados do usuário inválidos');
+      if (name == null || role == null) {
+        throw Exception('Dados do usuário inválidos');
+      }
 
       return UserModel(name: name, role: role, sellerId: sellerId);
     } catch (_) {

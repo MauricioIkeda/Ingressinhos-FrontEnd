@@ -29,6 +29,14 @@ String mapDioError(DioException e, String fallbackMessage) {
     if (data['message'] != null) {
       return data['message'].toString();
     }
+
+    if (data['detail'] != null) {
+      return data['detail'].toString();
+    }
+
+    if (data['title'] != null) {
+      return data['title'].toString();
+    }
   }
 
   if (data is String && data.trim().isNotEmpty) {

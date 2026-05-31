@@ -89,16 +89,11 @@ void setup() {
   );
 
   getIt.registerFactory(
-    () => EventsCubit(
-      eventRepository: getIt<EventsRepository>()
-    ),
+    () => EventsCubit(eventRepository: getIt<EventsRepository>()),
   );
 
   getIt.registerFactory(
-    () => SellerEventsCubit(
-      eventRepository: getIt<EventsRepository>(),
-      storage: getIt<SecureStorageService>(),
-    ),
+    () => SellerEventsCubit(eventRepository: getIt<EventsRepository>()),
   );
 
   getIt.registerFactory(

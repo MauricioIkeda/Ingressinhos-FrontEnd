@@ -19,14 +19,29 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     required String password,
   }) async {
     try {
-      final response = await _authDioClient.dio.post(
-        Endpoints.authLogin,
-        data: {'email': email, 'password': password},
+      final authorizeResponse = await _authDioClient.dio.post(
+        Endpoints.authAuthorize,
+        data: {
+          'email': email,
+          'password': password,
+          'clientId': 'ingressinhos-api',
+          'redirectUri': 'ingressinhos://auth/callback',
+          'state': 'ingressinhos',
+        },
+      );
+
+      final tokenResponse = await _authDioClient.dio.post(
+        Endpoints.authToken,
+        data: {
+          'code': authorizeResponse.data['code'],
+          'clientId': 'ingressinhos-api',
+          'redirectUri': 'ingressinhos://auth/callback',
+        },
       );
 
       return AuthTokens(
-        token: response.data['token'],
-        refreshToken: response.data['refreshToken'],
+        token: tokenResponse.data['accessToken'] ?? tokenResponse.data['token'],
+        refreshToken: tokenResponse.data['refreshToken'],
       );
     } on DioException catch (e) {
       throw AuthException(mapDioError(e, 'Erro ao fazer login'));
@@ -56,7 +71,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     required String email,
     required String password,
     required String cnpj,
-    required String tradingName
+    required String tradingName,
   }) async {
     try {
       await _ingressinhosClient.dio.post(
@@ -66,7 +81,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           'email': email,
           'password': password,
           'cnpj': cnpj,
-          'tradingName': tradingName
+          'tradingName': tradingName,
         },
       );
     } on DioException catch (e) {
@@ -82,11 +97,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       final response = await _authDioClient.dio.post(
         Endpoints.authRefreshToken,
-        data: {'token': token, 'refreshToken': refreshToken},
+        data: {'refreshToken': refreshToken},
       );
 
       return AuthTokens(
-        token: response.data['token'],
+        token: response.data['accessToken'] ?? response.data['token'],
         refreshToken: response.data['refreshToken'],
       );
     } on DioException catch (e) {

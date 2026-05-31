@@ -27,7 +27,7 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
         r'$orderby': orderBy,
       };
       if (sellerId != null) {
-        queryParameters['sellerId'] = sellerId;
+        queryParameters[r'$filter'] = 'SellerId eq $sellerId';
       }
 
       final response = await _ingressinhosClient.dio.get(
@@ -53,10 +53,35 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
         .toList();
   }
 
-@override
+  @override
+  Future<int> getCurrentSellerId() async {
+    try {
+      final response = await _ingressinhosClient.dio.get(Endpoints.sellerMe);
+      final sellerId = response.data['sellerId'];
+
+      if (sellerId is int) {
+        return sellerId;
+      }
+
+      if (sellerId is num) {
+        return sellerId.toInt();
+      }
+
+      throw const FormatException('SellerId invalido');
+    } on DioException catch (e) {
+      throw IngressinhosException(mapDioError(e, 'Erro ao buscar vendedor'));
+    } catch (e) {
+      throw IngressinhosException('Erro ao buscar vendedor: ${e.toString()}');
+    }
+  }
+
+  @override
   Future<void> createEvent(EventModel eventModel) async {
     try {
-      final response = await _ingressinhosClient.dio.post(Endpoints.eventos, data: eventModel.toJson());
+      final response = await _ingressinhosClient.dio.post(
+        Endpoints.eventos,
+        data: eventModel.toJson(),
+      );
 
       TicketModel ticket = TicketModel(
         eventId: response.data['eventId'].toInt(),
@@ -70,12 +95,16 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
         isActive: eventModel.isActive ?? true,
       );
 
-      await _ingressinhosClient.dio.post(Endpoints.tickets, data: ticket.toJson());
-
+      await _ingressinhosClient.dio.post(
+        Endpoints.tickets,
+        data: ticket.toJson(),
+      );
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao criar evento'));
     } catch (e) {
-      throw IngressinhosException('Erro do front burro cansado por algum motivo: ${e.toString()}');
+      throw IngressinhosException(
+        'Erro do front burro cansado por algum motivo: ${e.toString()}',
+      );
     }
   }
 
@@ -84,10 +113,7 @@ class EventsRemoteDatasourceImpl implements EventsRemoteDatasource {
     try {
       final payload = eventModel.toJson();
       payload['eventId'] = eventId;
-      await _ingressinhosClient.dio.put(
-        Endpoints.eventos,
-        data: payload,
-      );
+      await _ingressinhosClient.dio.put(Endpoints.eventos, data: payload);
     } on DioException catch (e) {
       throw IngressinhosException(mapDioError(e, 'Erro ao atualizar evento'));
     }

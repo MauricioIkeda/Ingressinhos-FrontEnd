@@ -1,7 +1,7 @@
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
 
-abstract class EventsRemoteDatasource{
+abstract class EventsRemoteDatasource {
   Future<List<EventModel>> getEvents({
     int skip = 0,
     int top = 4,
@@ -9,7 +9,9 @@ abstract class EventsRemoteDatasource{
     int? sellerId,
   });
   Future<List<LocationModel>> getAllLocations();
-  
+
+  Future<int> getCurrentSellerId();
+
   Future<void> createEvent(EventModel eventModel);
   Future<void> updateEvent(int eventId, EventModel eventModel);
   Future<void> deleteEvent(int eventId);

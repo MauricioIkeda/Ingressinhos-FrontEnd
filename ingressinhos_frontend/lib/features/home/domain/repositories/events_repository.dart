@@ -10,6 +10,8 @@ abstract class EventsRepository {
   });
   Future<List<LocationModel>> getAllLocations();
 
+  Future<int> getCurrentSellerId();
+
   Future<void> createEvent(EventModel eventModel);
   Future<void> updateEvent(int eventId, EventModel eventModel);
   Future<void> deleteEvent(int eventId);
