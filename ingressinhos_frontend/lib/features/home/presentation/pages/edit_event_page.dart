@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/data/models/location_model.dart';
+import 'package:ingressinhos_frontend/core/formatters/money_input_formatter.dart';
 import 'package:ingressinhos_frontend/core/theme/app_colors.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
@@ -172,10 +174,6 @@ class _EditEventPageState extends State<EditEventPage> {
     });
   }
 
-  double? _parseMoney(String value) {
-    return double.tryParse(value.trim().replaceAll(',', '.'));
-  }
-
   Future<void> _submit() async {
     final eventId = widget.event.id;
     if (eventId == null) {
@@ -201,9 +199,9 @@ class _EditEventPageState extends State<EditEventPage> {
         imageUrl: imageUrlController.text.trim().isEmpty
             ? null
             : imageUrlController.text.trim(),
-        baseTicketPrice: _parseMoney(baseTicketPriceController.text),
-        premiumTicketPrice: _parseMoney(premiumTicketPriceController.text),
-        vipTicketPrice: _parseMoney(vipTicketPriceController.text),
+        baseTicketPrice: parseMoney(baseTicketPriceController.text),
+        premiumTicketPrice: parseMoney(premiumTicketPriceController.text),
+        vipTicketPrice: parseMoney(vipTicketPriceController.text),
         isActive: widget.event.isActive ?? true,
         salesStartsAt: salesStartsAt,
         salesEndsAt: salesEndsAt,
@@ -236,13 +234,13 @@ class _EditEventPageState extends State<EditEventPage> {
           : 'Adicione uma descricao para deixar o evento mais atrativo.',
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
       baseTicketPrice: baseTicketPriceController.text.trim().isNotEmpty
-          ? _parseMoney(baseTicketPriceController.text)
+          ? parseMoney(baseTicketPriceController.text)
           : null,
       premiumTicketPrice: premiumTicketPriceController.text.trim().isNotEmpty
-          ? _parseMoney(premiumTicketPriceController.text)
+          ? parseMoney(premiumTicketPriceController.text)
           : null,
       vipTicketPrice: vipTicketPriceController.text.trim().isNotEmpty
-          ? _parseMoney(vipTicketPriceController.text)
+          ? parseMoney(vipTicketPriceController.text)
           : null,
     );
   }
@@ -377,6 +375,8 @@ class _EditEventPageState extends State<EditEventPage> {
                 'Preco do Ingresso Base',
                 baseTicketPriceController,
                 icon: Icons.confirmation_num_rounded,
+                isRequired: true,
+                isMoney: true,
                 onChanged: (_) => setState(() {}),
               ),
               if (hasSeats) ...[
@@ -385,6 +385,7 @@ class _EditEventPageState extends State<EditEventPage> {
                   'Preco do Ingresso Premium',
                   premiumTicketPriceController,
                   icon: Icons.confirmation_num_rounded,
+                  isMoney: true,
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 16),
@@ -392,6 +393,7 @@ class _EditEventPageState extends State<EditEventPage> {
                   'Preco do Ingresso VIP',
                   vipTicketPriceController,
                   icon: Icons.confirmation_num_rounded,
+                  isMoney: true,
                   onChanged: (_) => setState(() {}),
                 ),
               ],
@@ -591,15 +593,30 @@ class _EditEventPageState extends State<EditEventPage> {
     int maxLines = 1,
     IconData? icon,
     bool isRequired = false,
+    bool isMoney = false,
     ValueChanged<String>? onChanged,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      keyboardType: isMoney
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : null,
+      inputFormatters: isMoney
+          ? const <TextInputFormatter>[MoneyInputFormatter()]
+          : null,
       style: GoogleFonts.poppins(color: AppColors.primaryText),
       onChanged: onChanged,
       decoration: _inputDecoration(label, icon: icon),
       validator: (value) {
+        if (isMoney) {
+          return validateMoneyField(
+            value,
+            isRequired: isRequired,
+            emptyMessage: 'Campo obrigatorio',
+          );
+        }
+
         if (!isRequired) return null;
         if (value == null || value.trim().isEmpty) {
           return 'Campo obrigatorio';
