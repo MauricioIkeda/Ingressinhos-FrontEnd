@@ -21,20 +21,14 @@ class CartRemoteDatasourceImpl implements CartRemoteDatasource {
     try {
       await _ingressinhosClient.dio.post(
         Endpoints.cartItems,
-        data: {
-          'ticketId': ticketId,
-          'quantity': quantity,
-          'seatId': seatId,
-        },
+        data: {'ticketId': ticketId, 'quantity': quantity, 'seatId': seatId},
       );
     } on DioException catch (e) {
       throw IngressinhosException(
         mapDioError(e, 'Erro ao adicionar item no carrinho'),
       );
     } catch (e) {
-      throw IngressinhosException(
-        e.toString().replaceFirst('Exception: ', ''),
-      );
+      throw IngressinhosException(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
@@ -46,47 +40,36 @@ class CartRemoteDatasourceImpl implements CartRemoteDatasource {
       );
       return CartModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw IngressinhosException(
-        mapDioError(e, 'Erro ao buscar carrinho'),
-      );
+      if (e.response?.statusCode == 404) {
+        return const CartModel.empty();
+      }
+      throw IngressinhosException(mapDioError(e, 'Erro ao buscar carrinho'));
     } catch (e) {
-      throw IngressinhosException(
-        e.toString().replaceFirst('Exception: ', ''),
-      );
+      throw IngressinhosException(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
   @override
   Future<void> removeCartItem({required int orderItemId}) async {
     try {
-      await _ingressinhosClient.dio.delete(
-        Endpoints.cartItemById(orderItemId),
-      );
+      await _ingressinhosClient.dio.delete(Endpoints.cartItemById(orderItemId));
     } on DioException catch (e) {
       throw IngressinhosException(
         mapDioError(e, 'Erro ao remover item do carrinho'),
       );
     } catch (e) {
-      throw IngressinhosException(
-        e.toString().replaceFirst('Exception: ', ''),
-      );
+      throw IngressinhosException(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
   @override
   Future<void> resetCart({required int clientId}) async {
     try {
-      await _ingressinhosClient.dio.delete(
-        Endpoints.cartReset(clientId),
-      );
+      await _ingressinhosClient.dio.delete(Endpoints.cartReset(clientId));
     } on DioException catch (e) {
-      throw IngressinhosException(
-        mapDioError(e, 'Erro ao resetar carrinho'),
-      );
+      throw IngressinhosException(mapDioError(e, 'Erro ao resetar carrinho'));
     } catch (e) {
-      throw IngressinhosException(
-        e.toString().replaceFirst('Exception: ', ''),
-      );
+      throw IngressinhosException(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
@@ -102,13 +85,36 @@ class CartRemoteDatasourceImpl implements CartRemoteDatasource {
       }
       throw IngressinhosException('Resposta inválida ao finalizar compra');
     } on DioException catch (e) {
-      throw IngressinhosException(
-        mapDioError(e, 'Erro ao finalizar compra'),
-      );
+      throw IngressinhosException(mapDioError(e, 'Erro ao finalizar compra'));
     } catch (e) {
-      throw IngressinhosException(
-        e.toString().replaceFirst('Exception: ', ''),
+      throw IngressinhosException(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  @override
+  Future<CheckoutResponseModel> immediateOrder({
+    required int ticketId,
+    required int quantity,
+    int? seatId,
+  }) async {
+    try {
+      final response = await _ingressinhosClient.dio.post(
+        Endpoints.orderImmediate,
+        data: {
+          'items': [
+            {'ticketId': ticketId, 'quantity': quantity, 'seatId': seatId},
+          ],
+        },
       );
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return CheckoutResponseModel.fromJson(data);
+      }
+      throw IngressinhosException('Resposta inválida ao iniciar pagamento');
+    } on DioException catch (e) {
+      throw IngressinhosException(mapDioError(e, 'Erro ao iniciar compra'));
+    } catch (e) {
+      throw IngressinhosException(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 }

@@ -43,6 +43,7 @@ class _EditEventPageState extends State<EditEventPage> {
   List<LocationModel> locations = [];
   bool isLoadingLocations = true;
   bool _isSaving = false;
+  bool _isDeleting = false;
 
   @override
   void initState() {
@@ -213,6 +214,57 @@ class _EditEventPageState extends State<EditEventPage> {
     }
   }
 
+  Future<void> _confirmDelete() async {
+    final eventId = widget.event.id;
+    if (eventId == null) {
+      showErrorSnackBar(context, 'Evento invalido', true);
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.surfaceColor,
+          title: Text(
+            'Excluir evento?',
+            style: GoogleFonts.poppins(
+              color: AppColors.primaryText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(
+            'Essa ação remove o evento da loja. Eventos com pedidos ou ingressos vinculados não podem ser excluídos.',
+            style: GoogleFonts.poppins(color: AppColors.secondaryText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'Cancelar',
+                style: GoogleFonts.poppins(color: AppColors.secondaryText),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.errorColor,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                'Excluir',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+    context.read<EventsCubit>().deleteEvent(eventId);
+  }
+
   EventModel _buildPreviewEvent() {
     final name = nameController.text.trim();
     final description = descriptionController.text.trim();
@@ -272,12 +324,25 @@ class _EditEventPageState extends State<EditEventPage> {
             Navigator.pop(context, true);
           }
 
+          if (state is EventsDeleted) {
+            setState(() => _isDeleting = false);
+            showErrorSnackBar(context, 'Evento excluido com sucesso', false);
+            Navigator.pop(context, true);
+          }
+
           if (state is EventUpdating) {
             setState(() => _isSaving = true);
           }
 
+          if (state is EventDeleting) {
+            setState(() => _isDeleting = true);
+          }
+
           if (state is EventsError) {
-            setState(() => _isSaving = false);
+            setState(() {
+              _isSaving = false;
+              _isDeleting = false;
+            });
             showErrorSnackBar(context, state.message, true);
           }
         },
@@ -432,7 +497,7 @@ class _EditEventPageState extends State<EditEventPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _submit,
+                  onPressed: _isSaving || _isDeleting ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     foregroundColor: AppColors.primaryText,
@@ -457,6 +522,38 @@ class _EditEventPageState extends State<EditEventPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _isSaving || _isDeleting ? null : _confirmDelete,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.errorColor,
+                    side: const BorderSide(color: AppColors.errorColor),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: _isDeleting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: AppColors.errorColor,
+                          ),
+                        )
+                      : const Icon(Icons.delete_outline_rounded),
+                  label: Text(
+                    _isDeleting ? 'Excluindo...' : 'Excluir evento',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],

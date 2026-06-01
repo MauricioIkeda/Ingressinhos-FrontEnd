@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ingressinhos_frontend/core/data/models/event_model.dart';
 import 'package:ingressinhos_frontend/core/dependecy_injection/injection.dart';
@@ -10,7 +11,9 @@ import 'package:ingressinhos_frontend/core/widgets/app_snack_bar.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/auth/data/exceptions/ingressinhos_exception.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/pages/edit_event_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final EventModel event;
@@ -21,16 +24,38 @@ class EventDetailsPage extends StatefulWidget {
   State<EventDetailsPage> createState() => _EventDetailsPageState();
 }
 
-class _EventDetailsPageState extends State<EventDetailsPage> {
+class _EventDetailsPageState extends State<EventDetailsPage>
+    with WidgetsBindingObserver {
   int _baseQuantity = 0;
   int _premiumQuantity = 0;
   int _vipQuantity = 0;
+  bool _isBuying = false;
+  bool _openedExternalPayment = false;
   late final Future<bool> _canEditFuture;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _canEditFuture = _canEditEvent();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !_openedExternalPayment) {
+      return;
+    }
+
+    _openedExternalPayment = false;
+    if (!mounted) return;
+
+    context.read<EventsCubit>().loadEvents(reset: true, forceRefresh: true);
   }
 
   int get _totalTickets => _baseQuantity + _premiumQuantity + _vipQuantity;
@@ -89,22 +114,72 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     });
   }
 
-  void _onBuyPressed() {
+  Future<void> _onBuyPressed() async {
     if (_totalTickets <= 0) return;
 
-    final summary = <String>[];
-    if (_baseQuantity > 0) summary.add('Base: $_baseQuantity');
-    if (_premiumQuantity > 0) summary.add('Premium: $_premiumQuantity');
-    if (_vipQuantity > 0) summary.add('VIP: $_vipQuantity');
+    setState(() => _isBuying = true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Compra iniciada (${summary.join(' • ')}) • Total: ${_formatCurrency(_totalPrice)}',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-        ),
-      ),
-    );
+    try {
+      final checkout = await context.read<CartCubit>().buyNow(
+        event: widget.event,
+        baseQuantity: _baseQuantity,
+        premiumQuantity: _premiumQuantity,
+        vipQuantity: _vipQuantity,
+      );
+      if (!mounted) return;
+
+      final payload = checkout?.qrCode?.payload?.trim();
+      if (payload == null || payload.isEmpty) {
+        final message = context.read<CartCubit>().state.errorMessage;
+        showErrorSnackBar(
+          context,
+          message ?? 'Não foi possível abrir o pagamento.',
+          true,
+        );
+        return;
+      }
+
+      final uri = Uri.tryParse(payload);
+      if (uri == null) {
+        showErrorSnackBar(context, 'Link de pagamento inválido.', true);
+        return;
+      }
+
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!mounted) return;
+
+      if (launched) {
+        _openedExternalPayment = true;
+        setState(() {
+          _baseQuantity = 0;
+          _premiumQuantity = 0;
+          _vipQuantity = 0;
+        });
+        return;
+      }
+
+      showErrorSnackBar(context, 'Não foi possível abrir o pagamento.', true);
+    } on IngressinhosException catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(context, e.message, true);
+    } on PlatformException {
+      if (!mounted) return;
+      showErrorSnackBar(context, 'Não foi possível abrir o pagamento.', true);
+    } catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(
+        context,
+        e.toString().replaceFirst('Exception: ', ''),
+        true,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isBuying = false);
+      }
+    }
   }
 
   Future<void> _onAddToCart() async {
@@ -386,7 +461,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _totalTickets > 0 ? _onBuyPressed : null,
+                onPressed: _totalTickets > 0 && !_isBuying
+                    ? _onBuyPressed
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   foregroundColor: Colors.white,
@@ -395,15 +472,24 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: Text(
-                  _totalTickets > 0
-                      ? 'Comprar $_totalTickets ingresso(s)'
-                      : 'Selecione os ingressos',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                child: _isBuying
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.4,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        _totalTickets > 0
+                            ? 'Comprar $_totalTickets ingresso(s)'
+                            : 'Selecione os ingressos',
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 18),

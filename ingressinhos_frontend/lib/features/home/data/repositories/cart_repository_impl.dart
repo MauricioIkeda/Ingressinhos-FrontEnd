@@ -7,7 +7,7 @@ class CartRepositoryImpl implements CartRepository {
   final CartRemoteDatasource _remoteDatasource;
 
   CartRepositoryImpl({required CartRemoteDatasource remoteDatasource})
-      : _remoteDatasource = remoteDatasource;
+    : _remoteDatasource = remoteDatasource;
 
   @override
   Future<void> addCartItem({
@@ -40,5 +40,18 @@ class CartRepositoryImpl implements CartRepository {
   @override
   Future<CheckoutResponseModel> checkout({required int orderId}) {
     return _remoteDatasource.checkout(orderId: orderId);
+  }
+
+  @override
+  Future<CheckoutResponseModel> immediateOrder({
+    required int ticketId,
+    required int quantity,
+    int? seatId,
+  }) {
+    return _remoteDatasource.immediateOrder(
+      ticketId: ticketId,
+      quantity: quantity,
+      seatId: seatId,
+    );
   }
 }

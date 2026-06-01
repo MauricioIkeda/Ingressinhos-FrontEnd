@@ -15,4 +15,10 @@ abstract class CartRemoteDatasource {
   Future<void> resetCart({required int clientId});
 
   Future<CheckoutResponseModel> checkout({required int orderId});
+
+  Future<CheckoutResponseModel> immediateOrder({
+    required int ticketId,
+    required int quantity,
+    int? seatId,
+  });
 }

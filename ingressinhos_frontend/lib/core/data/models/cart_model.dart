@@ -15,6 +15,13 @@ class CartModel {
     required this.items,
   });
 
+  const CartModel.empty()
+    : id = null,
+      clientId = null,
+      totalAmount = 0,
+      status = null,
+      items = const [];
+
   factory CartModel.fromJson(Map<String, dynamic> json) {
     double parseDouble(dynamic value) {
       if (value == null) return 0;
@@ -25,9 +32,9 @@ class CartModel {
     final itemsJson = json['items'];
     final parsedItems = (itemsJson is List)
         ? itemsJson
-            .whereType<Map<String, dynamic>>()
-            .map(CartItemModel.fromJson)
-            .toList()
+              .whereType<Map<String, dynamic>>()
+              .map(CartItemModel.fromJson)
+              .toList()
         : <CartItemModel>[];
 
     return CartModel(

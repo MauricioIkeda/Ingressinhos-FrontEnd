@@ -9,8 +9,8 @@ class CartCubit extends Cubit<CartState> {
   final CartRepository _cartRepository;
 
   CartCubit({required CartRepository cartRepository})
-      : _cartRepository = cartRepository,
-        super(CartState());
+    : _cartRepository = cartRepository,
+      super(CartState());
 
   Future<void> loadCart({int clientId = 0}) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
@@ -38,11 +38,15 @@ class CartCubit extends Cubit<CartState> {
     final total = baseQuantity + premiumQuantity + vipQuantity;
     if (total <= 0) return;
 
+    if (event.hasSeats) {
+      throw IngressinhosException(
+        'Este evento exige escolha de assento. A seleção de assentos ainda não está disponível no app.',
+      );
+    }
+
     final ticketId = event.ticketId;
     if (ticketId == null) {
-      throw IngressinhosException(
-        'Ingresso indisponível para este evento.',
-      );
+      throw IngressinhosException('Ingresso indisponível para este evento.');
     }
 
     await _cartRepository.addCartItem(
@@ -93,6 +97,49 @@ class CartCubit extends Cubit<CartState> {
     try {
       final checkoutResponse = await _cartRepository.checkout(orderId: orderId);
       await loadCart(clientId: 0);
+      return checkoutResponse;
+    } on IngressinhosException catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.message));
+      return null;
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
+      return null;
+    }
+  }
+
+  Future<CheckoutResponseModel?> buyNow({
+    required EventModel event,
+    int baseQuantity = 0,
+    int premiumQuantity = 0,
+    int vipQuantity = 0,
+  }) async {
+    final total = baseQuantity + premiumQuantity + vipQuantity;
+    if (total <= 0) return null;
+
+    if (event.hasSeats) {
+      throw IngressinhosException(
+        'Este evento exige escolha de assento. A seleção de assentos ainda não está disponível no app.',
+      );
+    }
+
+    final ticketId = event.ticketId;
+    if (ticketId == null) {
+      throw IngressinhosException('Ingresso indisponível para este evento.');
+    }
+
+    emit(state.copyWith(isLoading: true, errorMessage: null));
+    try {
+      final checkoutResponse = await _cartRepository.immediateOrder(
+        ticketId: ticketId,
+        quantity: total,
+        seatId: null,
+      );
+      emit(state.copyWith(isLoading: false));
       return checkoutResponse;
     } on IngressinhosException catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.message));

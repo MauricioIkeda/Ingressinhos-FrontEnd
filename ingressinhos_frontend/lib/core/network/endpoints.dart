@@ -47,4 +47,5 @@ class Endpoints {
       '/api/orders/cart/items/$orderItemId';
   static String cartReset(int clientId) => '/api/orders/cart/reset/$clientId';
   static String cartCheckout(int orderId) => '/api/orders/$orderId/close/';
+  static const orderImmediate = '/api/orders/immediate';
 }

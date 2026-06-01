@@ -51,13 +51,17 @@ class MainApp extends StatelessWidget {
       child: BlocListener<AuthCubit, AuthState>(
         listenWhen: (_, state) => state is AuthUnauthenticated,
         listener: (_, _) {
-          appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+          appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+            '/',
+            (_) => false,
+          );
         },
         child: MaterialApp(
           navigatorKey: appNavigatorKey,
           debugShowCheckedModeBanner: false,
-          home: AuthGate(),
+          initialRoute: '/',
           routes: {
+            '/': (context) => const AuthGate(),
             '/login': (context) => LoginPage(),
             '/registerclient': (context) => RegisterClientPage(),
             '/registerseller': (context) => RegisterSellerPage(),

@@ -9,6 +9,7 @@ import 'package:ingressinhos_frontend/core/widgets/app_scaffold.dart';
 import 'package:ingressinhos_frontend/core/widgets/header.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_cubit.dart';
 import 'package:ingressinhos_frontend/features/home/presentation/cubit/cart_state.dart';
+import 'package:ingressinhos_frontend/features/home/presentation/cubit/events_cubit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CartPage extends StatefulWidget {
@@ -18,11 +19,33 @@ class CartPage extends StatefulWidget {
   State<CartPage> createState() => _CartPageState();
 }
 
-class _CartPageState extends State<CartPage> {
+class _CartPageState extends State<CartPage> with WidgetsBindingObserver {
+  bool _openedExternalPayment = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<CartCubit>().loadCart();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !_openedExternalPayment) {
+      return;
+    }
+
+    _openedExternalPayment = false;
+    if (!mounted) return;
+
+    context.read<CartCubit>().loadCart();
+    context.read<EventsCubit>().loadEvents(reset: true, forceRefresh: true);
   }
 
   @override
@@ -108,6 +131,9 @@ class _CartPageState extends State<CartPage> {
                               uri,
                               mode: LaunchMode.externalApplication,
                             );
+                            if (launched && context.mounted) {
+                              setState(() => _openedExternalPayment = true);
+                            }
                             if (!launched && context.mounted) {
                               showErrorSnackBar(
                                 context,
