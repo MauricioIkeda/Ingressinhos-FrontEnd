@@ -25,3 +25,7 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Local build-time environment values
+dart_defines.local.json
+*.local.dart_define.json
