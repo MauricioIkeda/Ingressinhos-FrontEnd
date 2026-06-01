@@ -41,38 +41,75 @@ class _ListEventPageState extends State<ListEventPage> {
     }
   }
 
+  Future<void> _refreshEvents() {
+    return context.read<EventsCubit>().loadEvents(
+      reset: true,
+      forceRefresh: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EventsCubit, EventsState>(
       builder: (context, state) {
         if (state is EventsLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return RefreshIndicator(
+            onRefresh: _refreshEvents,
+            child: const CustomScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ],
+            ),
+          );
         }
 
         if (state is EventsError) {
-          return Center(
-            child: Text(
-              state.message,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.redAccent,
-                fontWeight: FontWeight.w500,
-              ),
+          return RefreshIndicator(
+            onRefresh: _refreshEvents,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverFillRemaining(
+                  child: Center(
+                    child: Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }
 
         if (state is EventsLoaded) {
           if (state.events.isEmpty) {
-            return Center(
-              child: Text(
-                'Nenhum evento encontrado.',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w500,
-                ),
+            return RefreshIndicator(
+              onRefresh: _refreshEvents,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Text(
+                        'Nenhum evento encontrado.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -83,39 +120,57 @@ class _ListEventPageState extends State<ListEventPage> {
               final crossAxisCount = isNarrow ? 1 : 2;
               final showLoadingTile = state.isLoadingMore;
 
-              return GridView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  childAspectRatio: EventCard.aspectRatio,
+              return RefreshIndicator(
+                onRefresh: _refreshEvents,
+                child: GridView.builder(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                    childAspectRatio: EventCard.aspectRatio,
+                  ),
+                  itemCount: state.events.length + (showLoadingTile ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= state.events.length) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final event = state.events[index];
+                    return EventCard(
+                      event: event,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => EventDetailsPage(event: event),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-                itemCount:
-                    state.events.length + (showLoadingTile ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index >= state.events.length) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final event = state.events[index];
-                  return EventCard(
-                    event: event,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => EventDetailsPage(event: event),
-                        ),
-                      );
-                    },
-                  );
-                },
               );
             },
           );
         }
 
-        return const Center(child: Text('Nenhum evento encontrado.'));
+        return RefreshIndicator(
+          onRefresh: _refreshEvents,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                child: Center(
+                  child: Text(
+                    'Nenhum evento encontrado.',
+                    style: GoogleFonts.poppins(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }

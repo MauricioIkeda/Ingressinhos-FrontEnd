@@ -7,6 +7,7 @@ import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_cubi
 import 'package:ingressinhos_frontend/features/auth/presentation/cubit/auth_state.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:ingressinhos_frontend/features/auth/presentation/pages/profile_gate.dart';
+import 'package:ingressinhos_frontend/features/auth/presentation/pages/server_unavailable_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -40,8 +41,15 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        if (state is AuthAuthenticated || state is AuthServerDisconnected) {
+        if (state is AuthAuthenticated) {
           return const ProfileGate();
+        }
+
+        if (state is AuthServerDisconnected) {
+          return ServerUnavailablePage(
+            onRetry: () => context.read<AuthCubit>().checkAuthentication(),
+            onLogout: () => context.read<AuthCubit>().logout(),
+          );
         }
 
         if (state is AuthLoading) {
