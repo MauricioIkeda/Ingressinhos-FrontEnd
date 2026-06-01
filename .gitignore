@@ -30,5 +30,6 @@ doc/api/
 .env
 .env.local
 .env.*.local
+!.env.example
 dart_defines.local.json
 *.local.dart_define.json
