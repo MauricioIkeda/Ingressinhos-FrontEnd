@@ -47,6 +47,10 @@ class EventsCubit extends Cubit<EventsState> {
     return added;
   }
 
+  EventsLoaded _loadedState() {
+    return EventsLoaded(List<EventModel>.from(_events), hasMore: _hasMore);
+  }
+
   Future<void> loadEvents({
     bool reset = false,
     bool forceRefresh = false,
@@ -80,7 +84,7 @@ class EventsCubit extends Cubit<EventsState> {
       _skip = _events.length;
       _hasMore = events.length == _pageSize;
       _lastLoadedAt = DateTime.now();
-      emit(EventsLoaded(List<EventModel>.from(_events), hasMore: _hasMore));
+      emit(_loadedState());
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));
     } catch (e) {
@@ -137,7 +141,7 @@ class EventsCubit extends Cubit<EventsState> {
     try {
       await _eventRepository.createEvent(event);
       await loadEvents(reset: true, forceRefresh: true);
-      emit(const EventsCreated());
+      emit(EventsCreated(List<EventModel>.from(_events), hasMore: _hasMore));
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));
     } catch (e) {
@@ -151,7 +155,7 @@ class EventsCubit extends Cubit<EventsState> {
     try {
       await _eventRepository.updateEvent(eventId, event);
       await loadEvents(reset: true, forceRefresh: true);
-      emit(const EventsUpdated());
+      emit(EventsUpdated(List<EventModel>.from(_events), hasMore: _hasMore));
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));
     } catch (e) {
@@ -165,7 +169,7 @@ class EventsCubit extends Cubit<EventsState> {
     try {
       await _eventRepository.deleteEvent(eventId);
       await loadEvents(reset: true, forceRefresh: true);
-      emit(const EventsDeleted());
+      emit(EventsDeleted(List<EventModel>.from(_events), hasMore: _hasMore));
     } on IngressinhosException catch (e) {
       emit(EventsError(e.message));
     } catch (e) {

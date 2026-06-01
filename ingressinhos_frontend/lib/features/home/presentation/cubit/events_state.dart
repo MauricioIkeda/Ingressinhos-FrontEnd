@@ -30,8 +30,12 @@ class EventsError extends EventsState {
   const EventsError(this.message);
 }
 
-class EventsCreated extends EventsState {
-  const EventsCreated();
+class EventsCreated extends EventsLoaded {
+  const EventsCreated(
+    super.events, {
+    super.hasMore = true,
+    super.isLoadingMore = false,
+  });
 }
 
 class EventCreating extends EventsState {
@@ -42,14 +46,22 @@ class EventUpdating extends EventsState {
   const EventUpdating();
 }
 
-class EventsUpdated extends EventsState {
-  const EventsUpdated();
+class EventsUpdated extends EventsLoaded {
+  const EventsUpdated(
+    super.events, {
+    super.hasMore = true,
+    super.isLoadingMore = false,
+  });
 }
 
 class EventDeleting extends EventsState {
   const EventDeleting();
 }
 
-class EventsDeleted extends EventsState {
-  const EventsDeleted();
+class EventsDeleted extends EventsLoaded {
+  const EventsDeleted(
+    super.events, {
+    super.hasMore = true,
+    super.isLoadingMore = false,
+  });
 }
