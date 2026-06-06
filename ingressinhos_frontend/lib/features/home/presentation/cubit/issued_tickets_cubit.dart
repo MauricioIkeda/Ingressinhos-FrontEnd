@@ -7,7 +7,7 @@ import 'package:ingressinhos_frontend/features/home/presentation/cubit/issued_ti
 class IssuedTicketsCubit extends Cubit<IssuedTicketsState> {
   final IssuedTicketsRepository _issuedTicketsRepository;
   static const int _pageSize = 4;
-  static const String _orderBy = 'issuedAt desc';
+  static const String _orderBy = 'issuedAtUtc desc';
   final List<IssuedTicketModel> _tickets = [];
   int _skip = 0;
   bool _hasMore = true;
